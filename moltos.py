@@ -2,9 +2,19 @@
 """Moltos - Domain-agnostic industry intelligence framework.
 
 Usage:
-    python moltos.py --domain=advertising --profile=ricki daily
-    python moltos.py --domain=advertising --profile=ricki weekly --deliver
-    python moltos.py --domain=advertising --profile=ricki fundraising --deep
+    # Generate reports
+    python moltos.py run --domain=advertising --profile=ricki daily
+    python moltos.py run --domain=advertising --profile=ricki weekly --deliver
+
+    # Manage domains
+    python moltos.py domain list
+    python moltos.py domain create healthcare --display-name "Healthcare Intelligence"
+    python moltos.py domain show advertising
+
+    # Manage profiles
+    python moltos.py profile list advertising
+    python moltos.py profile create advertising sarah --thought-leader "Seth Godin:ThisIsSethsBlog:1"
+    python moltos.py profile show advertising ricki
 """
 
 import argparse
@@ -19,6 +29,120 @@ from core.profile_loader import load_profile, list_profiles
 from core.orchestrator import Orchestrator
 from core.delivery import deliver_report
 from core.lib import env
+from core.cli.domain_commands import add_domain_parser
+from core.cli.profile_commands import add_profile_parser
+
+
+def add_run_parser(subparsers: argparse._SubParsersAction) -> None:
+    """Add run command parser."""
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Generate a report",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  moltos.py run --domain=advertising --profile=ricki daily
+  moltos.py run --domain=advertising --profile=ricki weekly --deliver
+  moltos.py run --domain=advertising fundraising --deep --output=json
+        """,
+    )
+
+    # Required arguments
+    run_parser.add_argument(
+        "--domain",
+        required=True,
+        help="Domain instance to use (e.g., advertising, healthcare)",
+    )
+
+    # Optional arguments
+    run_parser.add_argument(
+        "--profile",
+        default="default",
+        help="Interest profile to load (default: default)",
+    )
+
+    run_parser.add_argument(
+        "--quick",
+        action="store_true",
+        help="Use quick/shallow data collection",
+    )
+
+    run_parser.add_argument(
+        "--deep",
+        action="store_true",
+        help="Use deep/thorough data collection",
+    )
+
+    run_parser.add_argument(
+        "--deliver",
+        action="store_true",
+        help="Deliver report via profile's delivery settings",
+    )
+
+    run_parser.add_argument(
+        "--output",
+        choices=["compact", "json", "markdown", "full"],
+        default="compact",
+        help="Output format (default: compact)",
+    )
+
+    run_parser.add_argument(
+        "--output-path",
+        type=Path,
+        help="Write output to file path",
+    )
+
+    run_parser.add_argument(
+        "--from-date",
+        help="Start date (YYYY-MM-DD). Defaults based on report type.",
+    )
+
+    run_parser.add_argument(
+        "--to-date",
+        help="End date (YYYY-MM-DD). Defaults to today.",
+    )
+
+    run_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be collected without running",
+    )
+
+    run_parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    # Report type subcommands
+    report_subparsers = run_parser.add_subparsers(dest="report_type", help="Report type to generate")
+
+    # Daily brief
+    daily_parser = report_subparsers.add_parser("daily", help="Generate daily brief")
+    daily_parser.add_argument(
+        "--sections",
+        nargs="+",
+        help="Specific sections to include",
+    )
+
+    # Weekly digest
+    weekly_parser = report_subparsers.add_parser("weekly", help="Generate weekly digest")
+    weekly_parser.add_argument(
+        "--sections",
+        nargs="+",
+        help="Specific sections to include",
+    )
+
+    # Fundraising outlook
+    fundraising_parser = report_subparsers.add_parser("fundraising", help="Generate fundraising outlook")
+    fundraising_parser.add_argument(
+        "--horizon",
+        choices=["6m", "1y", "3y", "all"],
+        default="all",
+        help="Forecast horizon to include",
+    )
+
+    run_parser.set_defaults(func=cmd_run)
 
 
 def parse_args() -> argparse.Namespace:
@@ -27,107 +151,24 @@ def parse_args() -> argparse.Namespace:
         description="Moltos - Industry Intelligence Framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
+Commands:
+  run       Generate a report
+  domain    Manage domain instances
+  profile   Manage interest profiles
+
 Examples:
-  moltos.py --domain=advertising --profile=ricki daily
-  moltos.py --domain=advertising --profile=ricki weekly --deliver
-  moltos.py --domain=advertising fundraising --deep --output=json
+  moltos.py run --domain=advertising --profile=ricki daily
+  moltos.py domain list
+  moltos.py profile show advertising ricki
         """,
     )
 
-    # Required arguments
-    parser.add_argument(
-        "--domain",
-        required=True,
-        help="Domain instance to use (e.g., advertising, healthcare)",
-    )
+    subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
-    # Optional arguments
-    parser.add_argument(
-        "--profile",
-        default="default",
-        help="Interest profile to load (default: default)",
-    )
-
-    parser.add_argument(
-        "--quick",
-        action="store_true",
-        help="Use quick/shallow data collection",
-    )
-
-    parser.add_argument(
-        "--deep",
-        action="store_true",
-        help="Use deep/thorough data collection",
-    )
-
-    parser.add_argument(
-        "--deliver",
-        action="store_true",
-        help="Deliver report via profile's delivery settings",
-    )
-
-    parser.add_argument(
-        "--output",
-        choices=["compact", "json", "markdown", "full"],
-        default="compact",
-        help="Output format (default: compact)",
-    )
-
-    parser.add_argument(
-        "--output-path",
-        type=Path,
-        help="Write output to file path",
-    )
-
-    parser.add_argument(
-        "--from-date",
-        help="Start date (YYYY-MM-DD). Defaults based on report type.",
-    )
-
-    parser.add_argument(
-        "--to-date",
-        help="End date (YYYY-MM-DD). Defaults to today.",
-    )
-
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be collected without running",
-    )
-
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Verbose output",
-    )
-
-    # Subcommands for report types
-    subparsers = parser.add_subparsers(dest="report_type", help="Report type to generate")
-
-    # Daily brief
-    daily_parser = subparsers.add_parser("daily", help="Generate daily brief")
-    daily_parser.add_argument(
-        "--sections",
-        nargs="+",
-        help="Specific sections to include",
-    )
-
-    # Weekly digest
-    weekly_parser = subparsers.add_parser("weekly", help="Generate weekly digest")
-    weekly_parser.add_argument(
-        "--sections",
-        nargs="+",
-        help="Specific sections to include",
-    )
-
-    # Fundraising outlook
-    fundraising_parser = subparsers.add_parser("fundraising", help="Generate fundraising outlook")
-    fundraising_parser.add_argument(
-        "--horizon",
-        choices=["6m", "1y", "3y", "all"],
-        default="all",
-        help="Forecast horizon to include",
-    )
+    # Add command parsers
+    add_run_parser(subparsers)
+    add_domain_parser(subparsers)
+    add_profile_parser(subparsers)
 
     return parser.parse_args()
 
@@ -325,10 +366,8 @@ def format_full(report: dict) -> str:
     return json.dumps(report, indent=2, default=str)
 
 
-def main() -> int:
-    """Main entry point."""
-    args = parse_args()
-
+def cmd_run(args: argparse.Namespace) -> int:
+    """Run report generation command."""
     if not args.report_type:
         print("Error: Please specify a report type (daily, weekly, fundraising)")
         return 1
@@ -426,6 +465,32 @@ def main() -> int:
         print(output)
 
     return 0
+
+
+def main() -> int:
+    """Main entry point."""
+    args = parse_args()
+
+    if not args.command:
+        print("Error: Please specify a command (run, domain, profile)")
+        print("Use --help for usage information")
+        return 1
+
+    # Execute command
+    if hasattr(args, "func"):
+        return args.func(args)
+    else:
+        # Handle missing subcommand
+        if args.command == "domain" and not args.domain_action:
+            print("Error: Please specify a domain action (create, update, list, show, validate)")
+            return 1
+        elif args.command == "profile" and not args.profile_action:
+            print("Error: Please specify a profile action (create, update, list, show, validate)")
+            return 1
+        elif args.command == "run" and not args.report_type:
+            print("Error: Please specify a report type (daily, weekly, fundraising)")
+            return 1
+        return 1
 
 
 if __name__ == "__main__":
