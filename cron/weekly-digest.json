@@ -1,5 +1,5 @@
 {
-  "name": "Moltos Weekly Digest",
+  "name": "MoltPulse Weekly Digest",
   "description": "Generate and deliver comprehensive weekly industry analysis",
   "schedule": {
     "kind": "cron",
@@ -9,7 +9,7 @@
   "sessionTarget": "isolated",
   "payload": {
     "kind": "agentTurn",
-    "message": "Run /moltos run --domain=advertising --profile=ricki --deep --deliver weekly",
+    "message": "Run /moltpulse run --domain=advertising --profile=ricki --deep --deliver weekly",
     "deliver": true
   },
   "notes": [

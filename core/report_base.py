@@ -1,4 +1,4 @@
-"""Abstract report base class for Moltos."""
+"""Abstract report base class for MoltPulse."""
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone

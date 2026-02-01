@@ -1,1 +1,1 @@
-"""Tests for Moltos."""
+"""Tests for MoltPulse."""

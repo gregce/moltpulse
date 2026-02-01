@@ -1,5 +1,5 @@
 {
-  "name": "Moltos Daily Brief",
+  "name": "MoltPulse Daily Brief",
   "description": "Generate and deliver morning industry intelligence brief",
   "schedule": {
     "kind": "cron",
@@ -9,7 +9,7 @@
   "sessionTarget": "isolated",
   "payload": {
     "kind": "agentTurn",
-    "message": "Run /moltos run --domain=advertising --profile=ricki --deliver daily",
+    "message": "Run /moltpulse run --domain=advertising --profile=ricki --deliver daily",
     "deliver": true
   },
   "notes": [

@@ -1,5 +1,5 @@
 {
-  "name": "Moltos Fundraising Outlook",
+  "name": "MoltPulse Fundraising Outlook",
   "description": "Generate monthly fundraising outlook for nonprofit targeting",
   "schedule": {
     "kind": "cron",
@@ -9,7 +9,7 @@
   "sessionTarget": "isolated",
   "payload": {
     "kind": "agentTurn",
-    "message": "Run /moltos run --domain=advertising --profile=ricki --deep --deliver fundraising",
+    "message": "Run /moltpulse run --domain=advertising --profile=ricki --deep --deliver fundraising",
     "deliver": true
   },
   "notes": [

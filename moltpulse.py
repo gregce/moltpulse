@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Moltos - Domain-agnostic industry intelligence framework.
+"""MoltPulse - Domain-agnostic industry intelligence framework.
 
 Usage:
     # Generate reports
-    python moltos.py run --domain=advertising --profile=ricki daily
-    python moltos.py run --domain=advertising --profile=ricki weekly --deliver
+    python moltpulse.py run --domain=advertising --profile=ricki daily
+    python moltpulse.py run --domain=advertising --profile=ricki weekly --deliver
 
     # Manage domains
-    python moltos.py domain list
-    python moltos.py domain create healthcare --display-name "Healthcare Intelligence"
-    python moltos.py domain show advertising
+    python moltpulse.py domain list
+    python moltpulse.py domain create healthcare --display-name "Healthcare Intelligence"
+    python moltpulse.py domain show advertising
 
     # Manage profiles
-    python moltos.py profile list advertising
-    python moltos.py profile create advertising sarah --thought-leader "Seth Godin:ThisIsSethsBlog:1"
-    python moltos.py profile show advertising ricki
+    python moltpulse.py profile list advertising
+    python moltpulse.py profile create advertising sarah --thought-leader "Seth Godin:ThisIsSethsBlog:1"
+    python moltpulse.py profile show advertising ricki
 """
 
 import argparse
@@ -41,9 +41,9 @@ def add_run_parser(subparsers: argparse._SubParsersAction) -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  moltos.py run --domain=advertising --profile=ricki daily
-  moltos.py run --domain=advertising --profile=ricki weekly --deliver
-  moltos.py run --domain=advertising fundraising --deep --output=json
+  moltpulse.py run --domain=advertising --profile=ricki daily
+  moltpulse.py run --domain=advertising --profile=ricki weekly --deliver
+  moltpulse.py run --domain=advertising fundraising --deep --output=json
         """,
     )
 
@@ -148,7 +148,7 @@ Examples:
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Moltos - Industry Intelligence Framework",
+        description="MoltPulse - Industry Intelligence Framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Commands:
@@ -157,9 +157,9 @@ Commands:
   profile   Manage interest profiles
 
 Examples:
-  moltos.py run --domain=advertising --profile=ricki daily
-  moltos.py domain list
-  moltos.py profile show advertising ricki
+  moltpulse.py run --domain=advertising --profile=ricki daily
+  moltpulse.py domain list
+  moltpulse.py profile show advertising ricki
         """,
     )
 
@@ -224,7 +224,7 @@ def format_compact(report: dict) -> str:
 
     # Title
     lines.append(f"\n{'=' * 60}")
-    lines.append(report.get("title", "MOLTOS REPORT"))
+    lines.append(report.get("title", "MOLTPULSE REPORT"))
     lines.append(f"Generated: {report.get('generated_at', 'Unknown')}")
     lines.append(f"{'=' * 60}\n")
 
@@ -298,7 +298,7 @@ def format_markdown(report: dict) -> str:
     lines = []
 
     # Title
-    lines.append(f"# {report.get('title', 'MOLTOS REPORT')}")
+    lines.append(f"# {report.get('title', 'MOLTPULSE REPORT')}")
     lines.append(f"*Generated: {report.get('generated_at', 'Unknown')}*")
     lines.append("")
 

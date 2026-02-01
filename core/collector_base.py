@@ -1,4 +1,4 @@
-"""Abstract collector base class for Moltos."""
+"""Abstract collector base class for MoltPulse."""
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple

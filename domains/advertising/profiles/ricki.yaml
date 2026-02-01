@@ -131,8 +131,8 @@ delivery:
   channel: email
   email:
     to: ""  # Configure via CLI
-    subject_prefix: "[Moltos]"
+    subject_prefix: "[MoltPulse]"
     format: html
   fallback:
     channel: file
-    path: "~/.moltos/reports/"
+    path: "~/.moltpulse/reports/"

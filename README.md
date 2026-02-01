@@ -1,10 +1,10 @@
-# Moltos
+# MoltPulse
 
 Domain-agnostic industry intelligence framework for OpenClaw.
 
 ## Overview
 
-Moltos is a flexible framework for monitoring industries, tracking market trends, and generating intelligence reports. It supports:
+MoltPulse is a flexible framework for monitoring industries, tracking market trends, and generating intelligence reports. It supports:
 
 - **Multiple Domains**: Configure monitoring for any industry (advertising, healthcare, fintech, etc.)
 - **Interest Profiles**: Different users can have different focus areas within the same domain
@@ -16,14 +16,14 @@ Moltos is a flexible framework for monitoring industries, tracking market trends
 
 ```bash
 # Clone the repository
-cd moltos
+cd moltpulse
 
 # Install dependencies with UV
 uv sync
 
 # Configure API keys
-mkdir -p ~/.config/moltos
-cat > ~/.config/moltos/.env << EOF
+mkdir -p ~/.config/moltpulse
+cat > ~/.config/moltpulse/.env << EOF
 ALPHA_VANTAGE_API_KEY=your_key_here
 NEWSDATA_API_KEY=your_key_here
 XAI_API_KEY=your_key_here
@@ -34,16 +34,16 @@ EOF
 
 ```bash
 # Generate daily brief for advertising domain
-uv run python moltos.py run --domain=advertising --profile=ricki daily
+uv run python moltpulse.py run --domain=advertising --profile=ricki daily
 
 # See available domains
-uv run python moltos.py domain list
+uv run python moltpulse.py domain list
 
 # See available profiles
-uv run python moltos.py profile list advertising
+uv run python moltpulse.py profile list advertising
 
 # Dry run to see what would be collected
-uv run python moltos.py run --domain=advertising --profile=ricki --dry-run daily
+uv run python moltpulse.py run --domain=advertising --profile=ricki --dry-run daily
 ```
 
 ## Architecture
@@ -65,30 +65,30 @@ uv run python moltos.py run --domain=advertising --profile=ricki --dry-run daily
 ### Directory Structure
 
 ```
-moltos/
-├── moltos.py               # CLI entry point
-├── SKILL.md                # OpenClaw skill definition
-├── core/                   # Framework engine
-│   ├── orchestrator.py     # Parallel execution
-│   ├── domain_loader.py    # Domain configuration
-│   ├── profile_loader.py   # Profile configuration
-│   ├── collector_base.py   # Abstract collectors
-│   ├── report_base.py      # Abstract reports
-│   ├── delivery.py         # Delivery mechanisms
-│   ├── cli/                # CLI commands
-│   └── lib/                # Utilities
-├── collectors/             # Reusable collectors
-│   ├── financial.py        # Stock data
-│   ├── news.py             # News aggregation
-│   ├── rss.py              # RSS feeds
-│   └── social_x.py         # X/Twitter
-├── domains/                # Domain instances
-│   └── advertising/        # Advertising domain
-│       ├── domain.yaml     # Domain definition
-│       ├── collectors/     # Domain-specific collectors
-│       ├── reports/        # Domain-specific reports
-│       └── profiles/       # User profiles
-└── cron/                   # OpenClaw cron templates
+moltpulse/
+├── moltpulse.py             # CLI entry point
+├── SKILL.md                 # OpenClaw skill definition
+├── core/                    # Framework engine
+│   ├── orchestrator.py      # Parallel execution
+│   ├── domain_loader.py     # Domain configuration
+│   ├── profile_loader.py    # Profile configuration
+│   ├── collector_base.py    # Abstract collectors
+│   ├── report_base.py       # Abstract reports
+│   ├── delivery.py          # Delivery mechanisms
+│   ├── cli/                 # CLI commands
+│   └── lib/                 # Utilities
+├── collectors/              # Reusable collectors
+│   ├── financial.py         # Stock data
+│   ├── news.py              # News aggregation
+│   ├── rss.py               # RSS feeds
+│   └── social_x.py          # X/Twitter
+├── domains/                 # Domain instances
+│   └── advertising/         # Advertising domain
+│       ├── domain.yaml      # Domain definition
+│       ├── collectors/      # Domain-specific collectors
+│       ├── reports/         # Domain-specific reports
+│       └── profiles/        # User profiles
+└── cron/                    # OpenClaw cron templates
 ```
 
 ## Commands
@@ -96,7 +96,7 @@ moltos/
 ### Report Generation
 
 ```bash
-moltos run --domain=DOMAIN --profile=PROFILE REPORT_TYPE [options]
+moltpulse run --domain=DOMAIN --profile=PROFILE REPORT_TYPE [options]
 ```
 
 Report types:
@@ -115,32 +115,32 @@ Options:
 
 ```bash
 # List domains
-moltos domain list
+moltpulse domain list
 
 # Create domain
-moltos domain create DOMAIN --display-name "Display Name"
+moltpulse domain create DOMAIN --display-name "Display Name"
 
 # Show domain
-moltos domain show DOMAIN [--yaml]
+moltpulse domain show DOMAIN [--yaml]
 
 # Update domain
-moltos domain update DOMAIN --add-entity TYPE:SYMBOL:NAME
+moltpulse domain update DOMAIN --add-entity TYPE:SYMBOL:NAME
 ```
 
 ### Profile Management
 
 ```bash
 # List profiles
-moltos profile list DOMAIN
+moltpulse profile list DOMAIN
 
 # Create profile
-moltos profile create DOMAIN NAME [options]
+moltpulse profile create DOMAIN NAME [options]
 
 # Show profile
-moltos profile show DOMAIN NAME [--yaml]
+moltpulse profile show DOMAIN NAME [--yaml]
 
 # Update profile
-moltos profile update DOMAIN NAME [options]
+moltpulse profile update DOMAIN NAME [options]
 ```
 
 ## Configuration
@@ -190,7 +190,7 @@ delivery:
   channel: email
   email:
     to: "user@example.com"
-    subject_prefix: "[Moltos]"
+    subject_prefix: "[MoltPulse]"
 ```
 
 ## OpenClaw Integration
@@ -199,7 +199,7 @@ delivery:
 
 ```bash
 # In OpenClaw
-/moltos run --domain=advertising --profile=ricki daily
+/moltpulse run --domain=advertising --profile=ricki daily
 ```
 
 ### Cron Scheduling
@@ -215,11 +215,11 @@ Or manually:
 
 ```bash
 openclaw cron add \
-  --name "Moltos Daily Brief" \
+  --name "MoltPulse Daily Brief" \
   --cron "0 7 * * 1-5" \
   --tz "America/Los_Angeles" \
   --session isolated \
-  --message "Run /moltos run --domain=advertising --profile=ricki --deliver daily"
+  --message "Run /moltpulse run --domain=advertising --profile=ricki --deliver daily"
 ```
 
 ## API Keys
@@ -243,7 +243,7 @@ Optional:
 
 1. Create domain skeleton:
    ```bash
-   moltos domain create myindustry --display-name "My Industry"
+   moltpulse domain create myindustry --display-name "My Industry"
    ```
 
 2. Edit `domains/myindustry/domain.yaml`
@@ -272,7 +272,7 @@ Optional:
 
 5. Create profiles:
    ```bash
-   moltos profile create myindustry user1 --thought-leader "Expert:handle:1"
+   moltpulse profile create myindustry user1 --thought-leader "Expert:handle:1"
    ```
 
 ### Running Tests

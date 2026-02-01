@@ -1,4 +1,4 @@
-"""RSS feed collector for Moltos."""
+"""RSS feed collector for MoltPulse."""
 
 import hashlib
 import re

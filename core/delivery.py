@@ -1,4 +1,4 @@
-"""Delivery mechanisms for Moltos reports."""
+"""Delivery mechanisms for MoltPulse reports."""
 
 import json
 import os
@@ -83,7 +83,7 @@ class FileDeliverer(Deliverer):
     ) -> DeliveryResult:
         try:
             # Get output directory
-            output_dir = Path(config.get("path", "~/moltos-reports")).expanduser()
+            output_dir = Path(config.get("path", "~/moltpulse-reports")).expanduser()
             output_dir.mkdir(parents=True, exist_ok=True)
 
             # Generate filename
@@ -140,7 +140,7 @@ class EmailDeliverer(Deliverer):
                     error="No 'to' address specified",
                 )
 
-            subject_prefix = config.get("subject_prefix", "[Moltos]")
+            subject_prefix = config.get("subject_prefix", "[MoltPulse]")
             subject = f"{subject_prefix} {report.title}"
 
             # Get SMTP config from environment
@@ -148,7 +148,7 @@ class EmailDeliverer(Deliverer):
             smtp_port = int(os.environ.get("SMTP_PORT", "587"))
             smtp_user = os.environ.get("SMTP_USER", "")
             smtp_pass = os.environ.get("SMTP_PASSWORD", "")
-            from_addr = os.environ.get("SMTP_FROM", smtp_user or "moltos@localhost")
+            from_addr = os.environ.get("SMTP_FROM", smtp_user or "moltpulse@localhost")
 
             # Create message
             msg = MIMEMultipart("alternative")
@@ -359,7 +359,7 @@ def format_report_text(report: schema.Report) -> str:
 def format_report_compact(report: schema.Report) -> str:
     """Format report in compact form for terminal."""
     lines = [
-        f"MOLTOS {report.report_type.upper().replace('_', ' ')} - {report.generated_at[:10]}",
+        f"MOLTPULSE {report.report_type.upper().replace('_', ' ')} - {report.generated_at[:10]}",
         "",
     ]
 

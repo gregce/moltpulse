@@ -1,4 +1,4 @@
-"""Domain configuration loader for Moltos."""
+"""Domain configuration loader for MoltPulse."""
 
 import importlib
 from pathlib import Path
@@ -184,7 +184,7 @@ def create_domain_skeleton(domain_name: str, display_name: Optional[str] = None)
         "reports": {},
         "delivery": {
             "channel": "file",
-            "file": {"path": "~/moltos-reports"},
+            "file": {"path": "~/moltpulse-reports"},
         },
     }
 

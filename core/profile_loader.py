@@ -1,4 +1,4 @@
-"""Profile configuration loader for Moltos."""
+"""Profile configuration loader for MoltPulse."""
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional

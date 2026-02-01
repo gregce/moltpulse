@@ -1,4 +1,4 @@
-"""Reusable collectors for Moltos."""
+"""Reusable collectors for MoltPulse."""
 
 from .financial import AlphaVantageCollector
 from .news import NewsDataCollector

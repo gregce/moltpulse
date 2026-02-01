@@ -220,7 +220,7 @@ def cmd_domain_create(args: argparse.Namespace) -> int:
     print(f"  1. Edit {config_file} to customize the domain")
     print(f"  2. Create collectors in {domain_path}/collectors/")
     print(f"  3. Create reports in {domain_path}/reports/")
-    print(f"  4. Create profiles with: moltos profile create {args.name} <profile_name>")
+    print(f"  4. Create profiles with: moltpulse profile create {args.name} <profile_name>")
 
     return 0
 
@@ -322,7 +322,7 @@ def cmd_domain_list(args: argparse.Namespace) -> int:
 
     if not domains:
         print("No domains found")
-        print("Create one with: moltos domain create <name>")
+        print("Create one with: moltpulse domain create <name>")
         return 0
 
     print("Available domains:")

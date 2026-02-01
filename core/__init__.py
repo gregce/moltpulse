@@ -1,4 +1,4 @@
-"""Moltos core framework - domain-agnostic intelligence engine."""
+"""MoltPulse core framework - domain-agnostic intelligence engine."""
 
 __version__ = "0.1.0"
 
@@ -15,7 +15,7 @@ from .collector_base import (
 )
 from .delivery import deliver_report, DeliveryResult
 from .domain_loader import DomainConfig, load_domain, list_domains, create_domain_skeleton
-from .orchestrator import Orchestrator, OrchestratorResult, run_moltos
+from .orchestrator import Orchestrator, OrchestratorResult, run_moltpulse
 from .profile_loader import ProfileConfig, load_profile, list_profiles, create_profile
 from .report_base import ReportGenerator, DailyBriefGenerator, WeeklyDigestGenerator
 
@@ -25,7 +25,7 @@ __all__ = [
     # Core classes
     "Orchestrator",
     "OrchestratorResult",
-    "run_moltos",
+    "run_moltpulse",
     # Domain/Profile
     "DomainConfig",
     "ProfileConfig",

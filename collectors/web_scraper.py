@@ -1,4 +1,4 @@
-"""Playwright-based web scraper for Moltos."""
+"""Playwright-based web scraper for MoltPulse."""
 
 import hashlib
 from datetime import datetime, timezone
@@ -28,7 +28,7 @@ class WebScraperCollector(Collector):
 
     def is_available(self) -> bool:
         """Check if scraping is enabled."""
-        enabled = self.config.get("MOLTOS_ENABLE_SCRAPING", "true")
+        enabled = self.config.get("MOLTPULSE_ENABLE_SCRAPING", "true")
         return enabled.lower() in ("1", "true", "yes")
 
     def collect(

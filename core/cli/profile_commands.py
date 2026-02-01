@@ -251,7 +251,7 @@ def cmd_profile_create(args: argparse.Namespace) -> int:
     if args.delivery_email:
         profile_data["delivery"]["email"] = {
             "to": args.delivery_email,
-            "subject_prefix": "[Moltos]",
+            "subject_prefix": "[MoltPulse]",
             "format": "html",
         }
 
@@ -265,7 +265,7 @@ def cmd_profile_create(args: argparse.Namespace) -> int:
     print(f"Created profile: {args.name}")
     print(f"  Domain: {args.domain}")
     print(f"  Path: {profile_path}")
-    print(f"\nRun with: moltos --domain={args.domain} --profile={args.name} daily")
+    print(f"\nRun with: moltpulse --domain={args.domain} --profile={args.name} daily")
 
     return 0
 
@@ -366,7 +366,7 @@ def cmd_profile_list(args: argparse.Namespace) -> int:
 
     if not profiles:
         print(f"No profiles found in domain '{args.domain}'")
-        print(f"Create one with: moltos profile create {args.domain} <name>")
+        print(f"Create one with: moltpulse profile create {args.domain} <name>")
         return 0
 
     print(f"Profiles in '{args.domain}':")

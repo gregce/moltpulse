@@ -354,14 +354,14 @@ class Orchestrator:
         )
 
 
-def run_moltos(
+def run_moltpulse(
     domain: str,
     profile: str = "default",
     report_type: str = "daily_brief",
     depth: str = "default",
     days: int = 30,
 ) -> OrchestratorResult:
-    """Convenience function to run Moltos.
+    """Convenience function to run MoltPulse.
 
     Args:
         domain: Domain name

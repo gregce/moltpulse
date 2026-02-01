@@ -1,5 +1,5 @@
 [project]
-name = "moltos"
+name = "moltpulse"
 version = "0.1.0"
 description = "Domain-agnostic industry intelligence framework"
 readme = "README.md"
@@ -23,7 +23,7 @@ dev = [
 ]
 
 [project.scripts]
-moltos = "moltos:main"
+moltpulse = "moltpulse:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -39,7 +39,6 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-asyncio_mode = "auto"
 
 [dependency-groups]
 dev = [

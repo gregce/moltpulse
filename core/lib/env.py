@@ -1,10 +1,10 @@
-"""Environment and API key management for Moltos."""
+"""Environment and API key management for MoltPulse."""
 
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-CONFIG_DIR = Path.home() / ".config" / "moltos"
+CONFIG_DIR = Path.home() / ".config" / "moltpulse"
 CONFIG_FILE = CONFIG_DIR / ".env"
 
 
@@ -32,7 +32,7 @@ def load_env_file(path: Path) -> Dict[str, str]:
 
 
 def get_config() -> Dict[str, Any]:
-    """Load configuration from ~/.config/moltos/.env and environment.
+    """Load configuration from ~/.config/moltpulse/.env and environment.
 
     Environment variables override file values.
     """
@@ -49,9 +49,9 @@ def get_config() -> Dict[str, Any]:
         "OPENAI_API_KEY",
         "INTELLIZENCE_API_KEY",
         # Feature flags
-        "MOLTOS_ENABLE_SCRAPING",
-        "MOLTOS_CACHE_TTL_HOURS",
-        "MOLTOS_DEBUG",
+        "MOLTPULSE_ENABLE_SCRAPING",
+        "MOLTPULSE_CACHE_TTL_HOURS",
+        "MOLTPULSE_DEBUG",
     ]
 
     config = {}
@@ -59,12 +59,12 @@ def get_config() -> Dict[str, Any]:
         config[key] = os.environ.get(key) or file_env.get(key)
 
     # Set defaults for feature flags
-    if config.get("MOLTOS_CACHE_TTL_HOURS") is None:
-        config["MOLTOS_CACHE_TTL_HOURS"] = "24"
-    if config.get("MOLTOS_ENABLE_SCRAPING") is None:
-        config["MOLTOS_ENABLE_SCRAPING"] = "true"
-    if config.get("MOLTOS_DEBUG") is None:
-        config["MOLTOS_DEBUG"] = "false"
+    if config.get("MOLTPULSE_CACHE_TTL_HOURS") is None:
+        config["MOLTPULSE_CACHE_TTL_HOURS"] = "24"
+    if config.get("MOLTPULSE_ENABLE_SCRAPING") is None:
+        config["MOLTPULSE_ENABLE_SCRAPING"] = "true"
+    if config.get("MOLTPULSE_DEBUG") is None:
+        config["MOLTPULSE_DEBUG"] = "false"
 
     return config
 
@@ -92,7 +92,7 @@ def get_available_collectors(config: Dict[str, Any]) -> Dict[str, bool]:
         "social_x": bool(config.get("XAI_API_KEY")),
         "social_openai": bool(config.get("OPENAI_API_KEY")),
         "pe_activity": bool(config.get("INTELLIZENCE_API_KEY")),
-        "web_scraper": config.get("MOLTOS_ENABLE_SCRAPING", "").lower() in ("1", "true", "yes"),
+        "web_scraper": config.get("MOLTPULSE_ENABLE_SCRAPING", "").lower() in ("1", "true", "yes"),
     }
 
 
@@ -116,4 +116,4 @@ def get_missing_keys(config: Dict[str, Any]) -> list[str]:
 def is_debug() -> bool:
     """Check if debug mode is enabled."""
     config = get_config()
-    return config.get("MOLTOS_DEBUG", "").lower() in ("1", "true", "yes")
+    return config.get("MOLTPULSE_DEBUG", "").lower() in ("1", "true", "yes")
