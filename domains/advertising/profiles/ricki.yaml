@@ -1,0 +1,138 @@
+# Ricki's advertising industry profile
+# Focused on fundraising opportunities and industry health
+
+profile_name: "ricki"
+description: "Advertising industry intelligence for nonprofit fundraising"
+extends: default
+
+# Entity focus - prioritized holding companies
+focus:
+  holding_companies:
+    priority_1:
+      - WPP
+      - OMC
+      - PUBGY
+      - IPG
+    priority_2:
+      - DNTUY
+      - HAVAF
+      - STAGW
+    priority_3:
+      - MDC
+      - YEXT
+      - MGID
+    exclude: []
+
+  agency_types:
+    primary:
+      - creative
+      - media
+      - technology
+      - ad_tech
+    secondary:
+      - entertainment
+      - talent
+    tertiary:
+      - pr
+      - production
+
+  # US market focus with UK secondary
+  geographic:
+    - United States
+    - United Kingdom
+
+# Thought leaders of particular importance
+thought_leaders:
+  - name: "Scott Galloway"
+    x_handle: "profgalloway"
+    priority: 1
+    notes: "NYU professor, industry critic"
+
+  - name: "Seth Godin"
+    x_handle: "ThisIsSethsBlog"
+    priority: 1
+    notes: "Marketing thought leader"
+
+  - name: "Gary Vaynerchuk"
+    x_handle: "garyvee"
+    priority: 1
+    notes: "VaynerMedia CEO"
+
+  - name: "Greg Kihlstrom"
+    x_handle: "gregkihlstrom"
+    priority: 2
+    notes: "Marketing technology expert"
+
+  - name: "Mark Pritchard"
+    x_handle: "PGMarcPritchard"
+    priority: 2
+    notes: "P&G Chief Brand Officer"
+
+  - name: "Shelley Palmer"
+    x_handle: "shelleypalmer"
+    priority: 2
+    notes: "Tech/media commentator"
+
+  - name: "Jonathan Mendenhall"
+    x_handle: "jmendenhall"
+    priority: 2
+    notes: "Agency executive"
+
+  - name: "David Sable"
+    x_handle: "DavidSable"
+    priority: 2
+    notes: "Former Y&R Global CEO"
+
+  - name: "Shingy"
+    x_handle: "shingy"
+    priority: 3
+    notes: "Digital prophet"
+
+# Publications prioritized
+publications:
+  - Forbes
+  - Ad Age
+  - AdWeek
+  - HBR
+  - Campaign
+  - Brandweek
+  - LinkedIn
+
+# All reports enabled including fundraising
+reports:
+  daily_brief: true
+  weekly_digest: true
+  fundraising: true
+
+# Keywords to boost relevance for fundraising context
+keywords:
+  boost:
+    - fundraising
+    - nonprofit
+    - philanthropy
+    - CSR
+    - corporate giving
+    - social impact
+    - sustainability
+    - DEI
+    - diversity
+    - purpose
+    - ESG
+  filter: []
+
+# Collection depth preferences
+depth:
+  daily: default
+  weekly: deep
+  fundraising: deep
+
+# Delivery settings
+delivery:
+  channel: email
+  email:
+    to: ""  # Configure via CLI
+    subject_prefix: "[Moltos]"
+    format: html
+  fallback:
+    channel: file
+    path: "~/.moltos/reports/"

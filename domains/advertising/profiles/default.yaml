@@ -1,0 +1,56 @@
+# Default profile for advertising domain
+# This is a baseline configuration that other profiles can extend
+
+profile_name: "default"
+description: "Default advertising industry monitoring profile"
+
+# Entity focus - all entities at equal priority
+focus:
+  holding_companies:
+    priority_1: []  # Override in specific profiles
+    priority_2: []
+    exclude: []
+
+  agency_types:
+    primary: [creative, media]
+    secondary: [technology, ad_tech]
+    tertiary: [entertainment, talent, pr, production]
+
+  geographic:
+    - United States
+    - United Kingdom
+    - Global
+
+# Thought leaders - domain defaults (can be overridden)
+thought_leaders:
+  - name: "Scott Galloway"
+    x_handle: "profgalloway"
+    priority: 1
+  - name: "Seth Godin"
+    x_handle: "ThisIsSethsBlog"
+    priority: 2
+
+# Publications to monitor (from domain.yaml)
+publications:
+  - Ad Age
+  - AdWeek
+  - Campaign
+  - The Drum
+  - Marketing Week
+  - Digiday
+
+# Reports to generate
+reports:
+  daily_brief: true
+  weekly_digest: true
+  fundraising: false
+
+# Scoring adjustments
+keywords:
+  boost: []
+  filter: []
+
+# Delivery settings (override per profile)
+delivery:
+  channel: console  # Default to console output
+  fallback: null

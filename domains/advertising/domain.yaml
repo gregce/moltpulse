@@ -1,0 +1,97 @@
+domain: advertising
+display_name: "Advertising Industry Intelligence"
+
+# Entity types available in this domain
+entity_types:
+  holding_companies:
+    - {symbol: WPP, name: "WPP plc"}
+    - {symbol: OMC, name: "Omnicom Group"}
+    - {symbol: PUBGY, name: "Publicis Groupe"}
+    - {symbol: IPG, name: "Interpublic Group"}
+    - {symbol: DNTUY, name: "Dentsu Group"}
+    - {symbol: HAVAF, name: "Havas Group"}
+    - {symbol: STAGW, name: "Stagwell Inc"}
+    - {symbol: MDCA, name: "MDC Partners"}
+    - {symbol: RLGY, name: "Realogy Holdings"}
+    - {symbol: VOUS, name: "Vous Labs"}
+
+  agency_categories:
+    - creative
+    - media
+    - technology
+    - ad_tech
+    - entertainment
+    - talent
+    - pr
+    - production
+
+  independent_agencies:
+    - {name: "Wieden+Kennedy", type: creative}
+    - {name: "R/GA", type: technology}
+    - {name: "Droga5", type: creative}
+    - {name: "72andSunny", type: creative}
+    - {name: "The Martin Agency", type: creative}
+    - {name: "Goodby Silverstein", type: creative}
+    - {name: "AKQA", type: technology}
+    - {name: "VMLY&R", type: creative}
+
+# Collectors available in this domain
+collectors:
+  - {type: financial, module: collectors.financial}
+  - {type: news, module: collectors.news}
+  - {type: rss, module: collectors.rss}
+  - {type: social, module: collectors.social_x}
+  - {type: awards, module: domains.advertising.collectors.awards}
+  - {type: pe_activity, module: domains.advertising.collectors.pe_activity}
+
+# Publications relevant to this domain
+publications:
+  - name: "Ad Age"
+    rss: "https://adage.com/rss.xml"
+    priority: 1
+  - name: "AdWeek"
+    rss: "https://www.adweek.com/feed/"
+    priority: 1
+  - name: "Campaign"
+    rss: "https://www.campaignlive.com/rss"
+    priority: 1
+  - name: "The Drum"
+    rss: "https://www.thedrum.com/rss.xml"
+    priority: 2
+  - name: "Marketing Week"
+    rss: "https://www.marketingweek.com/feed/"
+    priority: 2
+  - name: "Digiday"
+    rss: "https://digiday.com/feed/"
+    priority: 2
+  - name: "Forbes CMO"
+    rss: "https://www.forbes.com/cmo-network/feed/"
+    priority: 2
+  - name: "HBR Marketing"
+    rss: "https://hbr.org/topic/marketing/feed"
+    priority: 3
+
+# Award shows tracked
+awards:
+  - {name: "Cannes Lions", url: "https://www.canneslions.com", priority: 1}
+  - {name: "Effie Awards", url: "https://www.effie.org", priority: 1}
+  - {name: "Clio Awards", url: "https://clios.com", priority: 2}
+  - {name: "One Show", url: "https://www.oneclub.org", priority: 2}
+  - {name: "D&AD", url: "https://www.dandad.org", priority: 2}
+  - {name: "Webby Awards", url: "https://www.webbyawards.com", priority: 3}
+
+# Report types available
+reports:
+  - {type: daily_brief, module: domains.advertising.reports.daily_brief}
+  - {type: weekly_digest, module: domains.advertising.reports.weekly_digest}
+  - {type: fundraising, module: domains.advertising.reports.fundraising}
+
+# Default thought leaders (can be overridden in profiles)
+thought_leaders:
+  - {name: "Scott Galloway", x_handle: "profgalloway", newsletter: "No Mercy / No Malice"}
+  - {name: "Seth Godin", x_handle: "ThisIsSethsBlog", newsletter: "Seth's Blog"}
+  - {name: "Gary Vaynerchuk", x_handle: "garyvee"}
+  - {name: "Greg Kihlstrom", x_handle: "gregkihlstrom"}
+  - {name: "Mark Pritchard", x_handle: "PGMarcPritchard", title: "P&G Chief Brand Officer"}
+  - {name: "Shelley Palmer", x_handle: "shelleypalmer"}
+  - {name: "Bob Hoffman", x_handle: "adcontrarian", newsletter: "The Ad Contrarian"}
