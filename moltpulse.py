@@ -29,6 +29,7 @@ from core.profile_loader import load_profile, list_profiles
 from core.orchestrator import Orchestrator
 from core.delivery import deliver_report
 from core.lib import env
+from core.cli.config_commands import add_config_parser
 from core.cli.domain_commands import add_domain_parser
 from core.cli.profile_commands import add_profile_parser
 
@@ -153,10 +154,13 @@ def parse_args() -> argparse.Namespace:
         epilog="""
 Commands:
   run       Generate a report
+  config    Manage API keys and settings
   domain    Manage domain instances
   profile   Manage interest profiles
 
 Examples:
+  moltpulse.py config                                  # Show configuration status
+  moltpulse.py config set                              # Configure API keys interactively
   moltpulse.py run --domain=advertising --profile=ricki daily
   moltpulse.py domain list
   moltpulse.py profile show advertising ricki
@@ -167,6 +171,7 @@ Examples:
 
     # Add command parsers
     add_run_parser(subparsers)
+    add_config_parser(subparsers)
     add_domain_parser(subparsers)
     add_profile_parser(subparsers)
 
