@@ -1,0 +1,21 @@
+{
+  "name": "Moltos Fundraising Outlook",
+  "description": "Generate monthly fundraising outlook for nonprofit targeting",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 9 1 * *",
+    "tz": "America/Los_Angeles"
+  },
+  "sessionTarget": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Run /moltos run --domain=advertising --profile=ricki --deep --deliver fundraising",
+    "deliver": true
+  },
+  "notes": [
+    "Runs first of each month at 9am Pacific",
+    "Uses --deep for comprehensive analysis",
+    "Includes 6-month, 1-year, and 3-year outlooks",
+    "Customize --domain and --profile as needed"
+  ]
+}

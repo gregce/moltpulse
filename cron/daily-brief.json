@@ -1,0 +1,21 @@
+{
+  "name": "Moltos Daily Brief",
+  "description": "Generate and deliver morning industry intelligence brief",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 7 * * 1-5",
+    "tz": "America/Los_Angeles"
+  },
+  "sessionTarget": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Run /moltos run --domain=advertising --profile=ricki --deliver daily",
+    "deliver": true
+  },
+  "notes": [
+    "Runs weekdays at 7am Pacific",
+    "Uses isolated session for clean execution",
+    "Delivers via profile's configured channel",
+    "Customize --domain and --profile as needed"
+  ]
+}

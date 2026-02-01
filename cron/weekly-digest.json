@@ -1,0 +1,21 @@
+{
+  "name": "Moltos Weekly Digest",
+  "description": "Generate and deliver comprehensive weekly industry analysis",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 8 * * 1",
+    "tz": "America/Los_Angeles"
+  },
+  "sessionTarget": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Run /moltos run --domain=advertising --profile=ricki --deep --deliver weekly",
+    "deliver": true
+  },
+  "notes": [
+    "Runs Monday mornings at 8am Pacific",
+    "Uses --deep for thorough data collection",
+    "Delivers via profile's configured channel",
+    "Customize --domain and --profile as needed"
+  ]
+}
