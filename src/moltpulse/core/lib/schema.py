@@ -324,11 +324,17 @@ class Report:
     errors: List[str] = field(default_factory=list)
     from_cache: bool = False
     cache_age_hours: Optional[float] = None
-    # LLM enhancement fields
+    # LLM enhancement fields (legacy section-based)
     executive_summary: Optional[str] = None
     strategic_recommendations: List[str] = field(default_factory=list)
     llm_enhanced: bool = False
     llm_provider: Optional[str] = None  # "openclaw" | "claude_cli" | "anthropic"
+    # Narrative mode fields (Pyramid Principle)
+    narrative_brief: Optional[str] = None  # Full prose output with inline citations
+    themes: List[Dict[str, Any]] = field(default_factory=list)  # Identified themes
+    citation_map: Dict[int, Dict[str, Any]] = field(
+        default_factory=dict
+    )  # [1] -> {url, title, source}
 
     def to_dict(self) -> Dict[str, Any]:
         d = {
@@ -354,6 +360,13 @@ class Report:
             d["strategic_recommendations"] = self.strategic_recommendations
         if self.llm_provider:
             d["llm_provider"] = self.llm_provider
+        # Narrative mode fields
+        if self.narrative_brief:
+            d["narrative_brief"] = self.narrative_brief
+        if self.themes:
+            d["themes"] = self.themes
+        if self.citation_map:
+            d["citation_map"] = self.citation_map
         return d
 
 

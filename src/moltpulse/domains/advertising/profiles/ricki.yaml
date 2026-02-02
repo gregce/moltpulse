@@ -159,19 +159,70 @@ llm:
   thinking: medium  # low | medium | high
 
   prompts:
-    # System context for all LLM calls
+    # Enable narrative mode (Pyramid Principle)
+    narrative_mode: true
+
+    # Profile-specific settings for narrative generation
+    profile_purpose: "nonprofit fundraising donor cultivation"
+    profile_angle: "Fundraising"
+
+    # Theme identification prompt (customizes the default)
+    theme_identification: |
+      You are analyzing advertising industry intelligence for nonprofit fundraising.
+
+      Review the data and identify exactly 3 themes most relevant for donor outreach:
+      - Industry financial health (giving capacity signals)
+      - Leadership transitions (relationship opportunities)
+      - Market sentiment and trends (messaging implications)
+
+      Each theme should combine evidence from multiple sources (news, social, financial)
+      and have a clear implication for donor cultivation timing or messaging.
+
+      Respond with JSON only (no markdown code fences):
+      {
+        "themes": [
+          {
+            "title": "Theme title (5-7 words)",
+            "summary": "One sentence explaining the theme",
+            "relevant_citations": [1, 3, 5],
+            "implication": "One sentence on what this means for fundraising"
+          }
+        ]
+      }
+
+    # Narrative style prompt (customizes the generation)
+    narrative_style: |
+      Write an executive intelligence brief for a nonprofit development officer
+      targeting advertising industry donors.
+
+      Structure using the Pyramid Principle:
+      1. Lead with the bottom line - what should they do this week?
+      2. Support with 3 themes explaining why
+      3. Each theme backed by evidence with inline [N] citations
+      4. End with specific, timed action items
+
+      For each theme section, include a "Fundraising angle:" that explains:
+      - Outreach timing implications
+      - Messaging considerations
+      - Relationship opportunities
+
+      Write in prose, not bullet lists (except for action items).
+      Keep each theme section to 2-3 sentences.
+      Make recommended actions specific with timing (e.g., "This week:", "Q1:").
+
+    # System context for all LLM calls (legacy, used if narrative_mode: false)
     system_context: |
       You are analyzing advertising industry intelligence for a nonprofit fundraiser.
       Focus on actionable insights for donor cultivation timing and messaging.
       Consider corporate social responsibility trends and giving capacity indicators.
 
-    # Executive summary prompt
+    # Executive summary prompt (legacy)
     executive_summary: |
       Provide a 2-3 sentence executive summary highlighting the single most
       important development and its implications for nonprofit fundraising
       targeting advertising industry donors.
 
-    # Strategic recommendations prompt
+    # Strategic recommendations prompt (legacy)
     recommendations: |
       Provide 3-5 specific, actionable recommendations for a nonprofit fundraiser
       targeting advertising industry donors. Consider:
@@ -180,7 +231,7 @@ llm:
       - Executive moves that create relationship opportunities
       - M&A activity implications for donor landscape
 
-    # Per-section insight prompts
+    # Per-section insight prompts (legacy)
     section_insights:
       financial: |
         Analyze the stock performance data. Focus on industry health signals

@@ -31,7 +31,7 @@ from moltpulse.core.cli.domain_commands import add_domain_parser
 from moltpulse.core.cli.profile_commands import add_profile_parser
 from moltpulse.core.delivery import deliver_report
 from moltpulse.core.domain_loader import list_domains, load_domain
-from moltpulse.core.llm_enhance import enhance_report
+from moltpulse.core.llm_enhance import enhance_report, enhance_report_narrative
 from moltpulse.core.orchestrator import Orchestrator
 from moltpulse.core.profile_loader import list_profiles, load_profile
 from moltpulse.core.ui import console
@@ -302,6 +302,18 @@ Examples:
         help="LLM backend to use (default: auto-detect)",
     )
 
+    run_parser.add_argument(
+        "--narrative",
+        action="store_true",
+        help="Enable narrative mode (Pyramid Principle format)",
+    )
+
+    run_parser.add_argument(
+        "--no-narrative",
+        action="store_true",
+        help="Disable narrative mode (use legacy section format)",
+    )
+
     # Report type subcommands
     report_subparsers = run_parser.add_subparsers(
         dest="report_type", help="Report type to generate"
@@ -428,6 +440,43 @@ def format_output(report: dict, format_type: str) -> str:
 def format_compact(report: dict) -> str:
     """Format report in compact style for terminal."""
     lines = []
+
+    # Check for narrative mode - if present, use it directly
+    if report.get("narrative_brief"):
+        lines.append(f"\n{'=' * 60}")
+        lines.append("NARRATIVE INTELLIGENCE BRIEF")
+        lines.append(f"{'=' * 60}\n")
+
+        # Strip markdown formatting for terminal display
+        narrative = report["narrative_brief"]
+        # Convert markdown headers to uppercase with underlines
+        narrative = re.sub(r"^# (.+)$", r"\1\n" + "=" * 40, narrative, flags=re.MULTILINE)
+        narrative = re.sub(r"^## (.+)$", r"\n\1\n" + "-" * 30, narrative, flags=re.MULTILINE)
+        narrative = re.sub(r"^### (.+)$", r"\n\1", narrative, flags=re.MULTILINE)
+        # Convert bold to uppercase
+        narrative = re.sub(r"\*\*(.+?)\*\*", lambda m: m.group(1).upper(), narrative)
+        # Remove italic markers
+        narrative = re.sub(r"\*(.+?)\*", r"\1", narrative)
+
+        lines.append(narrative)
+
+        # Append citation references
+        citation_map = report.get("citation_map", {})
+        if citation_map:
+            lines.append(f"\n{'=' * 60}")
+            lines.append("SOURCES:")
+            for cid, ref in sorted(citation_map.items(), key=lambda x: int(x[0])):
+                title = ref.get("title", "Source")[:40]
+                source = ref.get("source", "")
+                if source:
+                    lines.append(f"  [{cid}] {title} - {source}")
+                else:
+                    lines.append(f"  [{cid}] {title}")
+
+        lines.append("")
+        return "\n".join(lines)
+
+    # Fall back to legacy section-based format
 
     # Title
     lines.append(f"\n{'=' * 60}")
@@ -565,6 +614,29 @@ def format_compact(report: dict) -> str:
 def format_markdown(report: dict) -> str:
     """Format report as markdown."""
     lines = []
+
+    # Check for narrative mode - if present, use it directly
+    if report.get("narrative_brief"):
+        lines.append(report["narrative_brief"])
+
+        # Append citation references if available
+        citation_map = report.get("citation_map", {})
+        if citation_map:
+            lines.append("")
+            lines.append("---")
+            lines.append("**Sources:**")
+            for cid, ref in sorted(citation_map.items(), key=lambda x: int(x[0])):
+                title = ref.get("title", "Source")[:50]
+                url = ref.get("url", "#")
+                source = ref.get("source", "")
+                if source:
+                    lines.append(f"[{cid}] [{title}]({url}) - {source}")
+                else:
+                    lines.append(f"[{cid}] [{title}]({url})")
+
+        return "\n".join(lines)
+
+    # Fall back to legacy section-based format
 
     # Title
     lines.append(f"# {report.get('title', 'MOLTPULSE REPORT')}")
@@ -823,9 +895,24 @@ def cmd_run(args: argparse.Namespace) -> int:
         skip_llm = getattr(args, "no_llm", False)
         llm_mode = getattr(args, "llm_mode", "auto")
         if not skip_llm and profile.is_llm_enabled():
-            with console.status("[purple]Enhancing report with AI insights...[/]", spinner="dots"):
-                enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
-            console.print("[green]✓[/] AI enhancement complete")
+            # Determine narrative mode from flags and profile
+            prompts = profile.get_all_prompts()
+            narrative_mode = prompts.get("narrative_mode", False)
+
+            # CLI flags override profile setting
+            if getattr(args, "narrative", False):
+                narrative_mode = True
+            elif getattr(args, "no_narrative", False):
+                narrative_mode = False
+
+            if narrative_mode:
+                with console.status("[purple]Generating narrative brief (Pyramid Principle)...[/]", spinner="dots"):
+                    enhance_report_narrative(result.report, mode=llm_mode, profile=profile)
+                console.print("[green]✓[/] Narrative brief complete")
+            else:
+                with console.status("[purple]Enhancing report with AI insights...[/]", spinner="dots"):
+                    enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
+                console.print("[green]✓[/] AI enhancement complete")
         else:
             enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
 
