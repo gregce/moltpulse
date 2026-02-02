@@ -1,0 +1,22 @@
+{
+  "name": "MoltPulse Daily Brief",
+  "description": "Generate and deliver morning industry intelligence brief",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 7 * * 1-5",
+    "tz": "America/Los_Angeles"
+  },
+  "sessionTarget": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "moltpulse run --domain=advertising --profile=ricki --output=markdown --no-deliver daily",
+    "deliver": true
+  },
+  "notes": [
+    "Runs weekdays at 7am Pacific",
+    "Uses isolated session for clean execution",
+    "OpenClaw handles delivery via --deliver flag",
+    "MoltPulse outputs markdown, skips its own delivery",
+    "Customize --domain and --profile as needed"
+  ]
+}

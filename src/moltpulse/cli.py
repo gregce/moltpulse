@@ -30,6 +30,7 @@ from moltpulse.core.orchestrator import Orchestrator
 from moltpulse.core.delivery import deliver_report
 from moltpulse.core.lib import env
 from moltpulse.core.cli.config_commands import add_config_parser, supports_color
+from moltpulse.core.cli.cron_commands import add_cron_parser
 from moltpulse.core.cli.domain_commands import add_domain_parser
 from moltpulse.core.cli.profile_commands import add_profile_parser
 
@@ -126,6 +127,7 @@ def print_welcome() -> None:
     print(c("COMMANDS", YELLOW))
     print()
     print(f"  {c('config', GREEN)}   Manage API keys and settings")
+    print(f"  {c('cron', GREEN)}     Install scheduled jobs to OpenClaw")
     print(f"  {c('domain', GREEN)}   Manage domain instances (advertising, healthcare, etc.)")
     print(f"  {c('profile', GREEN)}  Manage interest profiles within domains")
     print(f"  {c('run', GREEN)}      Generate intelligence reports")
@@ -180,6 +182,12 @@ Examples:
         "--deliver",
         action="store_true",
         help="Deliver report via profile's delivery settings",
+    )
+
+    run_parser.add_argument(
+        "--no-deliver",
+        action="store_true",
+        help="Output to stdout only, skip delivery (for OpenClaw orchestration)",
     )
 
     run_parser.add_argument(
@@ -274,6 +282,7 @@ Examples:
     # Add command parsers
     add_run_parser(subparsers)
     add_config_parser(subparsers)
+    add_cron_parser(subparsers)
     add_domain_parser(subparsers)
     add_profile_parser(subparsers)
 
@@ -555,8 +564,8 @@ def cmd_run(args: argparse.Namespace) -> int:
     # Format output
     output = format_output(report_dict, args.output)
 
-    # Delivery
-    if args.deliver:
+    # Delivery (--no-deliver overrides --deliver for OpenClaw orchestration)
+    if args.deliver and not args.no_deliver:
         result = deliver_report(report, profile, format=args.output)
         if not result.success:
             print(f"Warning: Delivery failed ({result.error}), outputting to console")
