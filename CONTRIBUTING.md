@@ -6,7 +6,7 @@ Thank you for your interest in contributing to MoltPulse! This guide will help y
 
 ```bash
 # Clone and install
-git clone https://github.com/your-org/moltpulse.git
+git clone https://github.com/gregce/moltpulse.git
 cd moltpulse
 
 # Install with uv (recommended)

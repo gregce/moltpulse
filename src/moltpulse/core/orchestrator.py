@@ -46,6 +46,13 @@ class Orchestrator:
         profile_name: str = "default",
         depth: str = "default",
         days: int = 30,
+        *,
+        collectors: Optional[List[str]] = None,
+        exclude_collectors: Optional[List[str]] = None,
+        no_cache: bool = False,
+        limit: Optional[int] = None,
+        retry: int = 0,
+        timeout: Optional[int] = None,
     ):
         """Initialize orchestrator.
 
@@ -54,11 +61,25 @@ class Orchestrator:
             profile_name: Name of the profile to use
             depth: Collection depth ('quick', 'default', 'deep')
             days: Number of days to look back
+            collectors: List of collector types to run (None = all)
+            exclude_collectors: List of collector types to skip
+            no_cache: Bypass cache and fetch fresh data
+            limit: Max items per collector (overrides depth)
+            retry: Number of retries for failed API calls
+            timeout: Custom timeout per collector in seconds
         """
         self.domain_name = domain_name
         self.profile_name = profile_name
         self.depth = depth
         self.days = days
+
+        # New options
+        self.collectors_filter = collectors
+        self.exclude_collectors = exclude_collectors or []
+        self.no_cache = no_cache
+        self.item_limit = limit
+        self.retry_count = retry
+        self.custom_timeout = timeout
 
         # Load configurations
         self.config = env.get_config()
@@ -81,6 +102,17 @@ class Orchestrator:
             collector_type = collector_def.get("type", "")
 
             if not module_path:
+                continue
+
+            # Filter by --collectors if specified
+            if self.collectors_filter is not None:
+                if collector_type not in self.collectors_filter:
+                    continue
+
+            # Filter by --exclude-collectors
+            if collector_type in self.exclude_collectors:
+                if env.is_debug():
+                    print(f"[DEBUG] Skipping excluded collector: {collector_type}", file=sys.stderr)
                 continue
 
             try:

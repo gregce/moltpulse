@@ -6,6 +6,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![OpenClaw Compatible](https://img.shields.io/badge/OpenClaw-compatible-green.svg)](https://github.com/openclaw/openclaw)
+[![Tests](https://img.shields.io/badge/tests-217%20passed-brightgreen.svg)](tests/)
 
 > Domain-agnostic industry intelligence framework
 
@@ -199,6 +203,18 @@ Collectors:
 | `--trace` | Show detailed execution trace with API calls and timing |
 | `--verbose`, `-v` | Verbose output with debug information |
 
+### Collector Control Flags
+
+| Flag | Description |
+|------|-------------|
+| `--collectors` | Comma-separated list of collectors to run (e.g., `news,rss,financial`) |
+| `--exclude-collectors` | Comma-separated list of collectors to skip (e.g., `pe_activity,awards`) |
+| `--no-cache` | Bypass cache and fetch fresh data |
+| `--quiet`, `-q` | Suppress progress output (for cron/CI environments) |
+| `--limit` | Maximum items per collector (overrides depth defaults) |
+| `--retry` | Number of retries for failed API calls (default: 0) |
+| `--timeout` | Custom timeout per collector in seconds |
+
 ### Report-Specific Flags
 
 | Report | Flag | Description |
@@ -206,6 +222,25 @@ Collectors:
 | `daily` | `--sections` | Specific sections to include |
 | `weekly` | `--sections` | Specific sections to include |
 | `fundraising` | `--horizon` | Forecast horizon: `6m`, `1y`, `3y`, `all` |
+
+### Examples
+
+```bash
+# Only run news and RSS collectors
+moltpulse run --domain=advertising --profile=ricki --collectors=news,rss daily
+
+# Skip slow PE activity collector
+moltpulse run --domain=advertising --profile=ricki --exclude-collectors=pe_activity daily
+
+# Force fresh data, quiet mode for cron
+moltpulse run --domain=advertising --profile=ricki --no-cache --quiet daily
+
+# Limit to 5 items per collector
+moltpulse run --domain=advertising --profile=ricki --limit=5 daily
+
+# Retry failed API calls up to 3 times
+moltpulse run --domain=advertising --profile=ricki --retry=3 daily
+```
 
 ## OpenClaw Integration
 

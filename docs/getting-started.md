@@ -6,7 +6,7 @@ This guide will help you set up MoltPulse and run your first report.
 
 ```bash
 # Clone and install
-git clone https://github.com/yourusername/moltpulse.git
+git clone https://github.com/gregce/moltpulse.git
 cd moltpulse
 uv pip install -e .
 

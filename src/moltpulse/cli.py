@@ -231,6 +231,48 @@ Examples:
         help="Verbose output",
     )
 
+    # Collector control flags
+    run_parser.add_argument(
+        "--collectors",
+        help="Comma-separated list of collectors to run (e.g., news,rss,financial)",
+    )
+
+    run_parser.add_argument(
+        "--exclude-collectors",
+        help="Comma-separated list of collectors to skip (e.g., pe_activity,awards)",
+    )
+
+    run_parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Bypass cache and fetch fresh data",
+    )
+
+    run_parser.add_argument(
+        "--quiet", "-q",
+        action="store_true",
+        help="Suppress progress output (for cron/CI)",
+    )
+
+    run_parser.add_argument(
+        "--limit",
+        type=int,
+        help="Maximum items per collector (overrides depth defaults)",
+    )
+
+    run_parser.add_argument(
+        "--retry",
+        type=int,
+        default=0,
+        help="Number of retries for failed API calls (default: 0)",
+    )
+
+    run_parser.add_argument(
+        "--timeout",
+        type=int,
+        help="Custom timeout per collector in seconds (overrides depth defaults)",
+    )
+
     # Report type subcommands
     report_subparsers = run_parser.add_subparsers(dest="report_type", help="Report type to generate")
 
@@ -533,12 +575,27 @@ def cmd_run(args: argparse.Namespace) -> int:
             print(f"Error: Invalid date format. Use YYYY-MM-DD.")
             return 1
 
+    # Parse collector filters
+    collectors_list = None
+    if args.collectors:
+        collectors_list = [c.strip() for c in args.collectors.split(",")]
+
+    exclude_list = []
+    if args.exclude_collectors:
+        exclude_list = [c.strip() for c in args.exclude_collectors.split(",")]
+
     # Initialize orchestrator
     orchestrator = Orchestrator(
         domain_name=args.domain,
         profile_name=args.profile,
         depth=depth,
         days=days,
+        collectors=collectors_list,
+        exclude_collectors=exclude_list,
+        no_cache=getattr(args, 'no_cache', False),
+        limit=getattr(args, 'limit', None),
+        retry=getattr(args, 'retry', 0),
+        timeout=getattr(args, 'timeout', None),
     )
 
     # Dry run - just show configuration and preflight
@@ -550,6 +607,20 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"Date range: {orchestrator.from_date} to {orchestrator.to_date}")
         print(f"Depth: {depth}")
 
+        # Show collector filter options if specified
+        if collectors_list:
+            print(f"Collectors (include): {', '.join(collectors_list)}")
+        if exclude_list:
+            print(f"Collectors (exclude): {', '.join(exclude_list)}")
+        if getattr(args, 'limit', None):
+            print(f"Item limit: {args.limit}")
+        if getattr(args, 'no_cache', False):
+            print("Cache: DISABLED (--no-cache)")
+        if getattr(args, 'retry', 0) > 0:
+            print(f"Retries: {args.retry}")
+        if getattr(args, 'timeout', None):
+            print(f"Timeout: {args.timeout}s")
+
         # Show preflight status
         orchestrator.print_preflight_report()
 
@@ -560,8 +631,12 @@ def cmd_run(args: argparse.Namespace) -> int:
             print(f"  ... and {len(profile.thought_leaders) - 5} more")
         return 0
 
-    # Determine if we should show progress (not for JSON output or no-deliver mode)
-    show_progress = not (args.output == "json" and args.no_deliver)
+    # Determine if we should show progress
+    # Suppress for: --quiet, JSON output with --no-deliver
+    show_progress = not (
+        getattr(args, 'quiet', False) or
+        (args.output == "json" and args.no_deliver)
+    )
 
     # Run collection and report generation
     try:
