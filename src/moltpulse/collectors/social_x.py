@@ -17,13 +17,11 @@ XAI_MODEL = "grok-4-1-fast"  # Required for x_search tool
 class XAICollector(SocialCollector):
     """Collector for X/Twitter posts via xAI API with x_search tool."""
 
+    REQUIRED_API_KEYS = ["XAI_API_KEY"]
+
     @property
     def name(self) -> str:
         return "xAI X Search"
-
-    def is_available(self) -> bool:
-        """Check if xAI API key is configured."""
-        return bool(self.config.get("XAI_API_KEY"))
 
     def collect(
         self,

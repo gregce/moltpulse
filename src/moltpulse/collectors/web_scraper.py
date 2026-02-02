@@ -18,6 +18,8 @@ class WebScraperCollector(Collector):
     inherit from this.
     """
 
+    REQUIRED_API_KEYS = []  # No API key needed, uses config setting
+
     @property
     def collector_type(self) -> str:
         return "web_scraper"
@@ -27,7 +29,7 @@ class WebScraperCollector(Collector):
         return "Web Scraper"
 
     def is_available(self) -> bool:
-        """Check if scraping is enabled."""
+        """Check if scraping is enabled via config setting."""
         enabled = self.config.get("MOLTPULSE_ENABLE_SCRAPING", "true")
         return enabled.lower() in ("1", "true", "yes")
 

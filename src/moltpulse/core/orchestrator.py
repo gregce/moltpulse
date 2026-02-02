@@ -89,6 +89,97 @@ class Orchestrator:
         self._collectors = collectors
         return collectors
 
+    def preflight_check(self) -> Dict[str, Any]:
+        """Check which collectors are available and report missing keys.
+
+        Returns:
+            Dict with:
+                - available: list of ready collector info
+                - unavailable: list of collectors with missing keys
+                - warnings: human-readable warning messages
+        """
+        results: Dict[str, Any] = {
+            "available": [],
+            "unavailable": [],
+            "warnings": [],
+        }
+
+        for collector_def in self.domain.collectors:
+            module_path = collector_def.get("module", "")
+            collector_type = collector_def.get("type", "")
+
+            if not module_path:
+                continue
+
+            try:
+                collector = self._load_collector(module_path, collector_type)
+                if collector is None:
+                    results["unavailable"].append({
+                        "name": module_path,
+                        "type": collector_type,
+                        "reason": "Failed to load",
+                    })
+                    continue
+
+                # Check API key requirements
+                missing_keys = collector.get_missing_keys(self.config)
+
+                if missing_keys and not collector.REQUIRES_ANY_KEY:
+                    # All keys required, some missing
+                    results["unavailable"].append({
+                        "name": collector.name,
+                        "type": collector_type,
+                        "missing_keys": missing_keys,
+                    })
+                    results["warnings"].append(
+                        f"⚠ {collector.name} unavailable: missing {', '.join(missing_keys)}"
+                    )
+                elif collector.REQUIRES_ANY_KEY and not collector.is_available():
+                    # Needs any one key, none present
+                    results["unavailable"].append({
+                        "name": collector.name,
+                        "type": collector_type,
+                        "missing_keys": collector.REQUIRED_API_KEYS,
+                        "requires_any": True,
+                    })
+                    results["warnings"].append(
+                        f"⚠ {collector.name} unavailable: needs one of {', '.join(collector.REQUIRED_API_KEYS)}"
+                    )
+                elif collector.is_available():
+                    results["available"].append({
+                        "name": collector.name,
+                        "type": collector_type,
+                    })
+            except Exception as e:
+                results["unavailable"].append({
+                    "name": module_path,
+                    "type": collector_type,
+                    "reason": str(e),
+                })
+
+        return results
+
+    def print_preflight_report(self) -> None:
+        """Print human-readable preflight status."""
+        check = self.preflight_check()
+
+        print("\nCollector Status:")
+        for item in check["available"]:
+            print(f"  ✓ {item['name']} ({item['type']})")
+
+        for item in check["unavailable"]:
+            if "missing_keys" in item:
+                if item.get("requires_any"):
+                    keys = " or ".join(item["missing_keys"])
+                    print(f"  ✗ {item['name']} (needs one of: {keys})")
+                else:
+                    keys = ", ".join(item["missing_keys"])
+                    print(f"  ✗ {item['name']} (missing: {keys})")
+            else:
+                print(f"  ✗ {item.get('name', 'Unknown')} ({item.get('reason', 'failed to load')})")
+
+        print()
+
     def _load_collector(self, module_path: str, collector_type: str) -> Optional[Collector]:
         """Load a collector from module path."""
         try:

@@ -15,13 +15,11 @@ from moltpulse.core.profile_loader import ProfileConfig
 class RSSCollector(RSSCollectorBase):
     """Collector for RSS/Atom feeds from publications."""
 
+    REQUIRED_API_KEYS = []  # No API key needed
+
     @property
     def name(self) -> str:
         return "RSS Feed"
-
-    def is_available(self) -> bool:
-        """RSS collector is always available (no API key needed)."""
-        return True
 
     def collect(
         self,

@@ -46,7 +46,17 @@ class Collector(ABC):
 
     Collectors fetch data from external sources (APIs, RSS, web scraping)
     and return normalized items with source citations.
+
+    Subclasses should declare their API key requirements:
+        REQUIRED_API_KEYS: List of keys that must all be present
+        OPTIONAL_API_KEYS: List of keys that enhance functionality
+        REQUIRES_ANY_KEY: If True, only one of REQUIRED_API_KEYS needed
     """
+
+    # API key requirements - subclasses should override
+    REQUIRED_API_KEYS: List[str] = []
+    OPTIONAL_API_KEYS: List[str] = []
+    REQUIRES_ANY_KEY: bool = False
 
     def __init__(self, config: Dict[str, Any]):
         """Initialize collector with configuration.
@@ -68,10 +78,27 @@ class Collector(ABC):
         """Return human-readable collector name."""
         pass
 
-    @abstractmethod
+    @classmethod
+    def get_required_keys(cls) -> List[str]:
+        """Return list of required API keys for this collector."""
+        return cls.REQUIRED_API_KEYS
+
+    @classmethod
+    def get_missing_keys(cls, config: Dict[str, Any]) -> List[str]:
+        """Return list of required API keys that are missing from config."""
+        return [key for key in cls.REQUIRED_API_KEYS if not config.get(key)]
+
     def is_available(self) -> bool:
-        """Check if this collector is available (has required API keys, etc.)."""
-        pass
+        """Check if this collector is available (has required API keys).
+
+        Default implementation checks REQUIRED_API_KEYS against config.
+        Subclasses can override for custom availability logic.
+        """
+        if not self.REQUIRED_API_KEYS:
+            return True
+        if self.REQUIRES_ANY_KEY:
+            return any(self.config.get(key) for key in self.REQUIRED_API_KEYS)
+        return all(self.config.get(key) for key in self.REQUIRED_API_KEYS)
 
     @abstractmethod
     def collect(

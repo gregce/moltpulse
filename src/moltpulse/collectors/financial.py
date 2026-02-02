@@ -15,13 +15,11 @@ ALPHA_VANTAGE_BASE_URL = "https://www.alphavantage.co/query"
 class AlphaVantageCollector(FinancialCollector):
     """Collector for stock market data via Alpha Vantage API."""
 
+    REQUIRED_API_KEYS = ["ALPHA_VANTAGE_API_KEY"]
+
     @property
     def name(self) -> str:
         return "Alpha Vantage Financial"
-
-    def is_available(self) -> bool:
-        """Check if Alpha Vantage API key is configured."""
-        return bool(self.config.get("ALPHA_VANTAGE_API_KEY"))
 
     def collect(
         self,
@@ -144,13 +142,11 @@ class AlphaVantageCollector(FinancialCollector):
 class YahooFinanceCollector(FinancialCollector):
     """Fallback collector using Yahoo Finance (no API key needed)."""
 
+    REQUIRED_API_KEYS = []  # No API key needed
+
     @property
     def name(self) -> str:
         return "Yahoo Finance"
-
-    def is_available(self) -> bool:
-        """Always available as fallback."""
-        return True
 
     def collect(
         self,

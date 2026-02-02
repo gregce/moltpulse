@@ -33,6 +33,8 @@ AWARD_SHOWS = {
 class AwardsCollector(AwardsCollectorBase):
     """Collector for advertising industry awards."""
 
+    REQUIRED_API_KEYS = []  # No API key needed, uses web scraping
+
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         self._scraper = WebScraperCollector(config)

@@ -44,17 +44,12 @@ MA_KEYWORDS = [
 class PEActivityCollector(PEActivityCollectorBase):
     """Collector for PE investments and M&A in advertising industry."""
 
+    REQUIRED_API_KEYS = ["INTELLIZENCE_API_KEY", "NEWSDATA_API_KEY", "NEWSAPI_API_KEY"]
+    REQUIRES_ANY_KEY = True  # Only one of these is needed
+
     @property
     def name(self) -> str:
         return "PE & M&A Activity"
-
-    def is_available(self) -> bool:
-        """Available if news APIs are configured or Intellizence API."""
-        return bool(
-            self.config.get("INTELLIZENCE_API_KEY")
-            or self.config.get("NEWSDATA_API_KEY")
-            or self.config.get("NEWSAPI_API_KEY")
-        )
 
     def collect(
         self,

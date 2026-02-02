@@ -16,13 +16,11 @@ NEWSDATA_BASE_URL = "https://newsdata.io/api/1/news"
 class NewsDataCollector(NewsCollector):
     """Collector for news articles via NewsData.io API."""
 
+    REQUIRED_API_KEYS = ["NEWSDATA_API_KEY"]
+
     @property
     def name(self) -> str:
         return "NewsData.io"
-
-    def is_available(self) -> bool:
-        """Check if NewsData.io API key is configured."""
-        return bool(self.config.get("NEWSDATA_API_KEY"))
 
     def collect(
         self,
@@ -156,13 +154,11 @@ class NewsDataCollector(NewsCollector):
 class NewsAPICollector(NewsCollector):
     """Fallback collector using NewsAPI.org."""
 
+    REQUIRED_API_KEYS = ["NEWSAPI_API_KEY"]
+
     @property
     def name(self) -> str:
         return "NewsAPI.org"
-
-    def is_available(self) -> bool:
-        """Check if NewsAPI key is configured."""
-        return bool(self.config.get("NEWSAPI_API_KEY"))
 
     def collect(
         self,
