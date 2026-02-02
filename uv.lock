@@ -286,7 +286,6 @@ wheels = [
 
 [[package]]
 name = "moltpulse"
-version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -318,7 +317,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
 ]
-provides-extras = ["scraping", "llm", "dev"]
+provides-extras = ["dev", "llm", "scraping"]
 
 [[package]]
 name = "packaging"

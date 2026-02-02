@@ -1,6 +1,7 @@
 """Financial data collector using Alpha Vantage API."""
 
 import hashlib
+import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -10,15 +11,35 @@ from moltpulse.core.profile_loader import ProfileConfig
 
 ALPHA_VANTAGE_BASE_URL = "https://www.alphavantage.co/query"
 
+# Alpha Vantage free tier rate limit: 1 request per second
+RATE_LIMIT_DELAY = 1.2  # seconds between requests (buffer for safety)
+
 
 class AlphaVantageCollector(FinancialCollector):
-    """Collector for stock market data via Alpha Vantage API."""
+    """Collector for stock market data via Alpha Vantage API.
+
+    Note: Alpha Vantage free tier has strict rate limits (1 req/sec, 25/day).
+    We use conservative limits to avoid hitting rate limits.
+    """
 
     REQUIRED_API_KEYS = ["ALPHA_VANTAGE_API_KEY"]
 
     @property
     def name(self) -> str:
         return "Alpha Vantage Financial"
+
+    def get_depth_config(self, depth: str) -> dict:
+        """Override depth config for Alpha Vantage rate limits.
+
+        Free tier: 1 request/second, 25 requests/day.
+        We limit symbols to avoid long delays and hitting daily limits.
+        """
+        configs = {
+            "quick": {"max_items": 3, "timeout": 30},      # ~4 seconds
+            "default": {"max_items": 5, "timeout": 60},    # ~6 seconds
+            "deep": {"max_items": 10, "timeout": 120},     # ~12 seconds
+        }
+        return configs.get(depth, configs["default"])
 
     def collect(
         self,
@@ -51,7 +72,11 @@ class AlphaVantageCollector(FinancialCollector):
         sources: List[schema.Source] = []
         errors = []
 
-        for symbol in symbols[:max_symbols]:
+        for i, symbol in enumerate(symbols[:max_symbols]):
+            # Rate limit: Alpha Vantage free tier allows 1 request/second
+            if i > 0:
+                time.sleep(RATE_LIMIT_DELAY)
+
             try:
                 quote = self._fetch_global_quote(symbol, api_key)
                 if quote:

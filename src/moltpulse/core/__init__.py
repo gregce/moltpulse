@@ -1,6 +1,6 @@
 """MoltPulse core framework - domain-agnostic intelligence engine."""
 
-__version__ = "0.1.0"
+from moltpulse import __version__
 
 from . import lib
 from .collector_base import (

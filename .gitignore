@@ -58,3 +58,6 @@ reports/
 # Cache
 .cache/
 .moltpulse-cache/
+
+# Auto-generated version file
+src/moltpulse/_version.py
