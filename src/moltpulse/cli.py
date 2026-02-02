@@ -436,11 +436,17 @@ def format_compact(report: dict) -> str:
         for item in items[:10]:  # Limit items in compact view
             if isinstance(item, dict):
                 # Format based on item type
-                if "symbol" in item:
+                if "entity_symbol" in item or "symbol" in item:
                     # Financial item
-                    change = item.get("change_pct") or item.get("change", 0)
-                    sign = "+" if change > 0 else ""
-                    lines.append(f"  {item.get('symbol')}: {item.get('price', 'N/A')} ({sign}{change:.1f}%)")
+                    symbol = item.get("entity_symbol") or item.get("symbol")
+                    name = item.get("entity_name", symbol)
+                    price = item.get("value") or item.get("price", "N/A")
+                    change = item.get("change_pct") or item.get("change") or 0
+                    sign = "+" if change and change > 0 else ""
+                    if isinstance(price, (int, float)):
+                        lines.append(f"  {name} ({symbol}): ${price:.2f} ({sign}{change:.1f}%)")
+                    else:
+                        lines.append(f"  {name} ({symbol}): {price}")
 
                 elif "title" in item and "url" in item:
                     # News item
@@ -531,10 +537,17 @@ def format_markdown(report: dict) -> str:
         items = section.get("items", [])
         for item in items:
             if isinstance(item, dict):
-                if "symbol" in item:
-                    change = item.get("change_pct") or item.get("change", 0)
-                    sign = "+" if change > 0 else ""
-                    lines.append(f"- **{item.get('symbol')}** ({item.get('name', '')}): {item.get('price', 'N/A')} ({sign}{change:.1f}%)")
+                if "entity_symbol" in item or ("symbol" in item and "value" in item):
+                    # Financial item
+                    symbol = item.get("entity_symbol") or item.get("symbol")
+                    name = item.get("entity_name") or item.get("name", symbol)
+                    price = item.get("value") or item.get("price", "N/A")
+                    change = item.get("change_pct") or item.get("change") or 0
+                    sign = "+" if change and change > 0 else ""
+                    if isinstance(price, (int, float)):
+                        lines.append(f"- **{name}** ({symbol}): ${price:.2f} ({sign}{change:.1f}%)")
+                    else:
+                        lines.append(f"- **{name}** ({symbol}): {price}")
 
                 elif "title" in item and "url" in item:
                     lines.append(f"- [{item.get('title', '')}]({item.get('url', '')})")
