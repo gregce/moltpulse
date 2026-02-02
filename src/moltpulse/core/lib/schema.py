@@ -295,13 +295,17 @@ class ReportSection:
     title: str
     items: List[Any]  # List of item dicts
     sources: List[Source] = field(default_factory=list)
+    insight: Optional[str] = None  # LLM-generated insight for this section
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d = {
             "title": self.title,
             "items": self.items,
             "sources": [s.to_dict() for s in self.sources],
         }
+        if self.insight:
+            d["insight"] = self.insight
+        return d
 
 
 @dataclass
@@ -320,9 +324,14 @@ class Report:
     errors: List[str] = field(default_factory=list)
     from_cache: bool = False
     cache_age_hours: Optional[float] = None
+    # LLM enhancement fields
+    executive_summary: Optional[str] = None
+    strategic_recommendations: List[str] = field(default_factory=list)
+    llm_enhanced: bool = False
+    llm_provider: Optional[str] = None  # "openclaw" | "claude_cli" | "anthropic"
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d = {
             "title": self.title,
             "domain": self.domain,
             "profile": self.profile,
@@ -337,7 +346,15 @@ class Report:
             "errors": self.errors,
             "from_cache": self.from_cache,
             "cache_age_hours": self.cache_age_hours,
+            "llm_enhanced": self.llm_enhanced,
         }
+        if self.executive_summary:
+            d["executive_summary"] = self.executive_summary
+        if self.strategic_recommendations:
+            d["strategic_recommendations"] = self.strategic_recommendations
+        if self.llm_provider:
+            d["llm_provider"] = self.llm_provider
+        return d
 
 
 def create_report(

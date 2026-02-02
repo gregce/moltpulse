@@ -37,6 +37,9 @@ class ProfileConfig:
         # Delivery configuration
         self.delivery: Dict[str, Any] = data.get("delivery", {})
 
+        # LLM enhancement configuration
+        self.llm: Dict[str, Any] = data.get("llm", {})
+
     def get_focused_entities(self, entity_type: str) -> List[Dict[str, Any]]:
         """Get entities filtered by profile focus.
 
@@ -127,6 +130,47 @@ class ProfileConfig:
                 by_priority[priority] = []
             by_priority[priority].append(leader)
         return by_priority
+
+    # LLM Enhancement Methods
+
+    def is_llm_enabled(self) -> bool:
+        """Check if LLM enhancement is enabled for this profile."""
+        return self.llm.get("enabled", True)
+
+    def get_llm_mode(self) -> str:
+        """Get LLM mode (auto, openclaw, claude_cli, anthropic, disabled)."""
+        return self.llm.get("mode", "auto")
+
+    def get_llm_thinking(self) -> str:
+        """Get LLM thinking level (low, medium, high)."""
+        return self.llm.get("thinking", "medium")
+
+    def get_prompt(self, prompt_type: str) -> Optional[str]:
+        """Get a custom prompt by type.
+
+        Args:
+            prompt_type: One of "system_context", "executive_summary",
+                        "recommendations", or a section insight key.
+
+        Returns:
+            The custom prompt string, or None if not defined.
+        """
+        prompts = self.llm.get("prompts", {})
+
+        # Check top-level prompts
+        if prompt_type in prompts:
+            return prompts[prompt_type]
+
+        # Check section_insights
+        section_insights = prompts.get("section_insights", {})
+        if prompt_type in section_insights:
+            return section_insights[prompt_type]
+
+        return None
+
+    def get_all_prompts(self) -> Dict[str, Any]:
+        """Get all custom prompts."""
+        return self.llm.get("prompts", {})
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""

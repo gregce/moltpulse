@@ -136,3 +136,47 @@ delivery:
   fallback:
     channel: file
     path: "~/.moltpulse/reports/"
+
+# LLM enhancement configuration
+llm:
+  enabled: true
+  mode: auto  # auto | openclaw | claude_cli | anthropic | disabled
+  thinking: medium  # low | medium | high
+
+  prompts:
+    # System context for all LLM calls
+    system_context: |
+      You are analyzing advertising industry intelligence for a nonprofit fundraiser.
+      Focus on actionable insights for donor cultivation timing and messaging.
+      Consider corporate social responsibility trends and giving capacity indicators.
+
+    # Executive summary prompt
+    executive_summary: |
+      Provide a 2-3 sentence executive summary highlighting the single most
+      important development and its implications for nonprofit fundraising
+      targeting advertising industry donors.
+
+    # Strategic recommendations prompt
+    recommendations: |
+      Provide 3-5 specific, actionable recommendations for a nonprofit fundraiser
+      targeting advertising industry donors. Consider:
+      - Timing of outreach based on industry cycles
+      - Companies showing strong financial performance or CSR initiatives
+      - Executive moves that create relationship opportunities
+      - M&A activity implications for donor landscape
+
+    # Per-section insight prompts
+    section_insights:
+      financial: |
+        Analyze the stock performance data. Focus on industry health signals
+        and implications for corporate giving capacity. Identify companies
+        with strong performance that may have increased philanthropic budgets.
+
+      news: |
+        Identify top 3 strategic themes and connect them to partnership
+        opportunities for nonprofit organizations. Note any CSR, DEI, or
+        sustainability initiatives mentioned.
+
+      pe_activity: |
+        Summarize M&A implications for the donor landscape. Highlight
+        post-merger integration opportunities where outreach timing matters.

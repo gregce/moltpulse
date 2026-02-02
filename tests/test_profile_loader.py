@@ -113,3 +113,80 @@ class TestValidateProfile:
         errors = validate_profile(profile)
         # May have email config warning but should be usable
         assert all("email" not in e.lower() for e in errors) or len(errors) <= 1
+
+
+class TestProfileConfigLLMMethods:
+    """Tests for ProfileConfig LLM-related methods."""
+
+    @pytest.fixture
+    def ricki_profile(self):
+        """Load Ricki's profile (has LLM config)."""
+        domain = load_domain("advertising")
+        return load_profile(domain, "ricki")
+
+    @pytest.fixture
+    def default_profile(self):
+        """Load default profile (no LLM config)."""
+        domain = load_domain("advertising")
+        return load_profile(domain, "default")
+
+    def test_is_llm_enabled_with_config(self, ricki_profile):
+        """Should return True when LLM is enabled in config."""
+        assert ricki_profile.is_llm_enabled() is True
+
+    def test_is_llm_enabled_default(self, default_profile):
+        """Should return True by default (no config)."""
+        assert default_profile.is_llm_enabled() is True
+
+    def test_get_llm_mode_with_config(self, ricki_profile):
+        """Should return mode from config."""
+        mode = ricki_profile.get_llm_mode()
+        assert mode == "auto"
+
+    def test_get_llm_mode_default(self, default_profile):
+        """Should return 'auto' by default."""
+        mode = default_profile.get_llm_mode()
+        assert mode == "auto"
+
+    def test_get_llm_thinking_with_config(self, ricki_profile):
+        """Should return thinking level from config."""
+        thinking = ricki_profile.get_llm_thinking()
+        assert thinking == "medium"
+
+    def test_get_prompt_system_context(self, ricki_profile):
+        """Should return custom system context prompt."""
+        prompt = ricki_profile.get_prompt("system_context")
+        assert prompt is not None
+        assert "nonprofit" in prompt.lower()
+
+    def test_get_prompt_executive_summary(self, ricki_profile):
+        """Should return custom executive summary prompt."""
+        prompt = ricki_profile.get_prompt("executive_summary")
+        assert prompt is not None
+        assert "fundraising" in prompt.lower()
+
+    def test_get_prompt_section_insight(self, ricki_profile):
+        """Should return section insight prompts."""
+        financial = ricki_profile.get_prompt("financial")
+        assert financial is not None
+        assert "stock" in financial.lower()
+
+        news = ricki_profile.get_prompt("news")
+        assert news is not None
+
+    def test_get_prompt_missing(self, ricki_profile):
+        """Should return None for undefined prompts."""
+        prompt = ricki_profile.get_prompt("nonexistent_prompt")
+        assert prompt is None
+
+    def test_get_all_prompts(self, ricki_profile):
+        """Should return all custom prompts."""
+        prompts = ricki_profile.get_all_prompts()
+        assert "system_context" in prompts
+        assert "executive_summary" in prompts
+        assert "section_insights" in prompts
+
+    def test_llm_attribute_exists(self, ricki_profile):
+        """Profile should have llm attribute."""
+        assert hasattr(ricki_profile, "llm")
+        assert isinstance(ricki_profile.llm, dict)

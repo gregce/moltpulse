@@ -30,6 +30,7 @@ from moltpulse.core.cli.domain_commands import add_domain_parser
 from moltpulse.core.cli.profile_commands import add_profile_parser
 from moltpulse.core.delivery import deliver_report
 from moltpulse.core.domain_loader import list_domains, load_domain
+from moltpulse.core.llm_enhance import enhance_report
 from moltpulse.core.orchestrator import Orchestrator
 from moltpulse.core.profile_loader import list_profiles, load_profile
 
@@ -275,6 +276,20 @@ Examples:
         help="Custom timeout per collector in seconds (overrides depth defaults)",
     )
 
+    # LLM enhancement flags
+    run_parser.add_argument(
+        "--no-llm",
+        action="store_true",
+        help="Skip LLM enhancement (no executive summary or insights)",
+    )
+
+    run_parser.add_argument(
+        "--llm-mode",
+        choices=["auto", "openclaw", "claude_cli", "anthropic", "disabled"],
+        default="auto",
+        help="LLM backend to use (default: auto-detect)",
+    )
+
     # Report type subcommands
     report_subparsers = run_parser.add_subparsers(dest="report_type", help="Report type to generate")
 
@@ -401,7 +416,16 @@ def format_compact(report: dict) -> str:
     lines.append(f"\n{'=' * 60}")
     lines.append(report.get("title", "MOLTPULSE REPORT"))
     lines.append(f"Generated: {report.get('generated_at', 'Unknown')}")
+    if report.get("llm_enhanced"):
+        lines.append(f"Enhanced by: {report.get('llm_provider', 'LLM')}")
     lines.append(f"{'=' * 60}\n")
+
+    # Executive Summary (if present)
+    if report.get("executive_summary"):
+        lines.append("EXECUTIVE SUMMARY")
+        lines.append("-" * 40)
+        lines.append(report["executive_summary"])
+        lines.append("")
 
     # Sections
     for section in report.get("sections", []):
@@ -452,6 +476,19 @@ def format_compact(report: dict) -> str:
             else:
                 lines.append(f"  - {str(item)[:100]}")
 
+        # Section insight (if present)
+        if section.get("insight"):
+            lines.append("")
+            lines.append(f"  *Insight: {section['insight']}*")
+
+    # Strategic Recommendations (if present)
+    if report.get("strategic_recommendations"):
+        lines.append(f"\n{'=' * 60}")
+        lines.append("STRATEGIC RECOMMENDATIONS")
+        lines.append("-" * 40)
+        for i, rec in enumerate(report["strategic_recommendations"], 1):
+            lines.append(f"  {i}. {rec}")
+
     # Sources
     sources = report.get("all_sources", [])
     if sources:
@@ -475,7 +512,16 @@ def format_markdown(report: dict) -> str:
     # Title
     lines.append(f"# {report.get('title', 'MOLTPULSE REPORT')}")
     lines.append(f"*Generated: {report.get('generated_at', 'Unknown')}*")
+    if report.get("llm_enhanced"):
+        lines.append(f"*Enhanced by: {report.get('llm_provider', 'LLM')}*")
     lines.append("")
+
+    # Executive Summary (if present)
+    if report.get("executive_summary"):
+        lines.append("## Executive Summary")
+        lines.append("")
+        lines.append(report["executive_summary"])
+        lines.append("")
 
     # Sections
     for section in report.get("sections", []):
@@ -521,6 +567,19 @@ def format_markdown(report: dict) -> str:
             else:
                 lines.append(f"- {item}")
 
+        # Section insight (if present)
+        if section.get("insight"):
+            lines.append("")
+            lines.append(f"*Insight: {section['insight']}*")
+
+        lines.append("")
+
+    # Strategic Recommendations (if present)
+    if report.get("strategic_recommendations"):
+        lines.append("## Strategic Recommendations")
+        lines.append("")
+        for i, rec in enumerate(report["strategic_recommendations"], 1):
+            lines.append(f"{i}. {rec}")
         lines.append("")
 
     # Sources
@@ -663,6 +722,11 @@ def cmd_run(args: argparse.Namespace) -> int:
         if result.report is None:
             print("Error: No report generated")
             return 1
+
+        # Enhance report with LLM (unless disabled)
+        skip_llm = getattr(args, 'no_llm', False)
+        llm_mode = getattr(args, 'llm_mode', 'auto')
+        enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
 
         # Convert report to dict for output
         report_dict = result.report.to_dict()
