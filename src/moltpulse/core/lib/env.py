@@ -75,6 +75,10 @@ SETTINGS_REGISTRY = {
 }
 
 # Collector information for status display
+# NOTE: This is a static registry for the `moltpulse config` display.
+# The authoritative source of truth for API key requirements is the
+# REQUIRED_API_KEYS class attribute on each Collector subclass.
+# Use Orchestrator.preflight_check() for accurate runtime status.
 COLLECTOR_INFO = {
     "financial": {
         "name": "Financial",
@@ -92,20 +96,21 @@ COLLECTOR_INFO = {
         "description": "RSS feeds (no key required)",
         "requires": [],
     },
-    "social_x": {
+    "social": {
         "name": "Social/X",
-        "description": "X/Twitter search",
+        "description": "X/Twitter search via xAI",
         "requires": ["XAI_API_KEY"],
     },
-    "social_openai": {
-        "name": "Social/OpenAI",
-        "description": "OpenAI-powered analysis",
-        "requires": ["OPENAI_API_KEY"],
+    "awards": {
+        "name": "Awards",
+        "description": "Industry awards tracking",
+        "requires": [],  # Uses web scraping
     },
     "pe_activity": {
         "name": "PE/M&A",
-        "description": "M&A tracking",
-        "requires": ["INTELLIZENCE_API_KEY"],
+        "description": "M&A tracking (Intellizence or news fallback)",
+        "requires": ["INTELLIZENCE_API_KEY", "NEWSDATA_API_KEY", "NEWSAPI_API_KEY"],
+        "requires_any": True,
     },
     "web_scraper": {
         "name": "Web Scraper",
@@ -263,15 +268,21 @@ def mask_key(value: Optional[str], visible_chars: int = 4) -> str:
 def get_available_collectors(config: Dict[str, Any]) -> Dict[str, bool]:
     """Determine which collectors are available based on API keys.
 
-    Returns dict mapping collector name to availability.
+    Returns dict mapping collector type to availability.
+    NOTE: This is a simplified check. Use Orchestrator.preflight_check()
+    for accurate runtime status that queries actual collector classes.
     """
     return {
         "financial": bool(config.get("ALPHA_VANTAGE_API_KEY")),
         "news": bool(config.get("NEWSDATA_API_KEY") or config.get("NEWSAPI_API_KEY")),
         "rss": True,  # No API key needed
-        "social_x": bool(config.get("XAI_API_KEY")),
-        "social_openai": bool(config.get("OPENAI_API_KEY")),
-        "pe_activity": bool(config.get("INTELLIZENCE_API_KEY")),
+        "social": bool(config.get("XAI_API_KEY")),
+        "awards": True,  # Uses web scraping, no API key
+        "pe_activity": bool(
+            config.get("INTELLIZENCE_API_KEY")
+            or config.get("NEWSDATA_API_KEY")
+            or config.get("NEWSAPI_API_KEY")
+        ),
         "web_scraper": str(config.get("MOLTPULSE_ENABLE_SCRAPING", "")).lower() in ("1", "true", "yes"),
     }
 
