@@ -1,7 +1,7 @@
 """Near-duplicate detection for Moltos."""
 
 import re
-from typing import List, Set, Tuple, Union
+from typing import List, Set, Tuple
 
 from . import schema
 

@@ -1,16 +1,12 @@
 """Profile management CLI commands."""
 
 import argparse
-import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import yaml
 
-from ..domain_loader import load_domain, list_domains
+from ..domain_loader import load_domain
 from ..profile_loader import (
-    ProfileConfig,
-    create_profile,
     list_profiles,
     load_profile,
     validate_profile,
@@ -303,7 +299,7 @@ def cmd_profile_update(args: argparse.Namespace) -> int:
                 "priority": int(parts[2]) if len(parts) > 2 else 2,
             }
             # Check if already exists
-            if not any(l.get("x_handle") == leader["x_handle"] for l in leaders):
+            if not any(existing.get("x_handle") == leader["x_handle"] for existing in leaders):
                 leaders.append(leader)
                 print(f"Added thought leader: {parts[0]} (@{parts[1]})")
                 changed = True

@@ -9,7 +9,6 @@ from moltpulse.core.collector_base import CollectorResult, NewsCollector
 from moltpulse.core.lib import http, schema
 from moltpulse.core.profile_loader import ProfileConfig
 
-
 NEWSDATA_BASE_URL = "https://newsdata.io/api/1/news"
 
 

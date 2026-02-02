@@ -22,18 +22,15 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
-from moltpulse.core.domain_loader import load_domain, list_domains
-from moltpulse.core.profile_loader import load_profile, list_profiles
-from moltpulse.core.orchestrator import Orchestrator
-from moltpulse.core.delivery import deliver_report
-from moltpulse.core.lib import env
 from moltpulse.core.cli.config_commands import add_config_parser, supports_color
 from moltpulse.core.cli.cron_commands import add_cron_parser
 from moltpulse.core.cli.domain_commands import add_domain_parser
 from moltpulse.core.cli.profile_commands import add_profile_parser
-
+from moltpulse.core.delivery import deliver_report
+from moltpulse.core.domain_loader import list_domains, load_domain
+from moltpulse.core.orchestrator import Orchestrator
+from moltpulse.core.profile_loader import list_profiles, load_profile
 
 # ASCII Art Logo
 LOGO = r"""
@@ -544,7 +541,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     # Load domain configuration
     try:
         domain = load_domain(args.domain)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         print(f"Error: Domain '{args.domain}' not found")
         print(f"Available domains: {', '.join(list_domains())}")
         return 1
@@ -552,7 +549,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     # Load profile
     try:
         profile = load_profile(domain, args.profile)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         print(f"Error: Profile '{args.profile}' not found in domain '{args.domain}'")
         print(f"Available profiles: {', '.join(list_profiles(args.domain))}")
         return 1
@@ -572,7 +569,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             to_dt = dt.strptime(args.to_date, "%Y-%m-%d") if args.to_date else dt.now()
             days = (to_dt - from_dt).days
         except ValueError:
-            print(f"Error: Invalid date format. Use YYYY-MM-DD.")
+            print("Error: Invalid date format. Use YYYY-MM-DD.")
             return 1
 
     # Parse collector filters

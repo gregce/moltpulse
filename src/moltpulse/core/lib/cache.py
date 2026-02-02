@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 CACHE_DIR = Path.home() / ".cache" / "moltos"
 DEFAULT_TTL_HOURS = 24

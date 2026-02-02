@@ -5,8 +5,8 @@ Adapted from the last30days skill pattern.
 """
 
 import sys
-import time
 import threading
+import time
 from typing import Optional
 
 # Check if we're in a real terminal (not captured by Claude Code)

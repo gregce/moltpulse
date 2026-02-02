@@ -2,16 +2,15 @@
 
 import importlib
 import sys
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple
 
 from .collector_base import Collector, CollectorResult
-from .domain_loader import DomainConfig, load_domain
-from .lib import cache, dates, dedupe, env, normalize, schema, score
-from .profile_loader import ProfileConfig, load_profile
+from .domain_loader import load_domain
+from .lib import dates, dedupe, env, normalize, schema, score
+from .profile_loader import load_profile
 from .report_base import ReportGenerator
 from .trace import CollectorTrace, RunTrace, TracingContext
 from .ui import RunProgress

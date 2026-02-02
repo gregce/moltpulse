@@ -101,7 +101,6 @@ def request(
     # Track timing for tracing
     start_time = time.monotonic()
     status_code = 0
-    error_msg = None
 
     last_error = None
     for attempt in range(retries):
@@ -119,7 +118,7 @@ def request(
             body = None
             try:
                 body = e.read().decode("utf-8")
-            except:
+            except Exception:
                 pass
             log(f"HTTP Error {e.code}: {e.reason}")
             if body:

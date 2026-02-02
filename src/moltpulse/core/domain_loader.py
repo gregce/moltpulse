@@ -1,12 +1,9 @@
 """Domain configuration loader for MoltPulse."""
 
-import importlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
-
-from .lib import schema
 
 
 class DomainConfig:

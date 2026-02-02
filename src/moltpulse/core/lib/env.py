@@ -3,7 +3,7 @@
 import os
 import stat
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 CONFIG_DIR = Path.home() / ".config" / "moltpulse"
 CONFIG_FILE = CONFIG_DIR / ".env"

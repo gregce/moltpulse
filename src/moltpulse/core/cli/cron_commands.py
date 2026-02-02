@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+
 # Find cron templates directory (bundled with package)
 def get_cron_templates_dir() -> Optional[Path]:
     """Find the cron templates directory."""

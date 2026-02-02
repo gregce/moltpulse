@@ -5,9 +5,10 @@ import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
-from moltpulse.core.collector_base import CollectorResult, RSSCollector as RSSCollectorBase
+from moltpulse.core.collector_base import CollectorResult
+from moltpulse.core.collector_base import RSSCollector as RSSCollectorBase
 from moltpulse.core.lib import http, schema
 from moltpulse.core.profile_loader import ProfileConfig
 

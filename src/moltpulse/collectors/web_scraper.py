@@ -1,7 +1,7 @@
 """Playwright-based web scraper for MoltPulse."""
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 

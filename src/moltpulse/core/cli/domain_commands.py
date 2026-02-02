@@ -1,16 +1,11 @@
 """Domain management CLI commands."""
 
 import argparse
-import sys
-from pathlib import Path
-from typing import List, Optional
 
 import yaml
 
 from ..domain_loader import (
-    DomainConfig,
     create_domain_skeleton,
-    find_domains_dir,
     list_domains,
     load_domain,
     validate_domain,
@@ -216,7 +211,7 @@ def cmd_domain_create(args: argparse.Namespace) -> int:
     print(f"Created domain: {args.name}")
     print(f"  Path: {domain_path}")
     print(f"  Config: {config_file}")
-    print(f"\nNext steps:")
+    print("\nNext steps:")
     print(f"  1. Edit {config_file} to customize the domain")
     print(f"  2. Create collectors in {domain_path}/collectors/")
     print(f"  3. Create reports in {domain_path}/reports/")

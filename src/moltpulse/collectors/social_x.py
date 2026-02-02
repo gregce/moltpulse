@@ -3,12 +3,11 @@
 import hashlib
 import json
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from moltpulse.core.collector_base import CollectorResult, SocialCollector
 from moltpulse.core.lib import http, schema
 from moltpulse.core.profile_loader import ProfileConfig
-
 
 XAI_BASE_URL = "https://api.x.ai/v1/responses"
 XAI_MODEL = "grok-4-1-fast"  # Required for x_search tool
@@ -61,8 +60,7 @@ class XAICollector(SocialCollector):
             if handle:
                 leaders_by_handle[handle] = leader.get("name", handle)
 
-        # Build search query
-        handles_query = " OR ".join([f"from:@{h}" for h in handles[:10]])
+        # Build search prompt for xAI
         search_prompt = self._build_search_prompt(handles, from_date, to_date, max_items)
 
         try:

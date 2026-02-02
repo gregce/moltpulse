@@ -5,7 +5,7 @@ import urllib.error
 import urllib.request
 from typing import Tuple
 
-from .http import fetch_text, HTTPError
+from .http import fetch_text
 
 
 def test_alpha_vantage_key(key: str) -> Tuple[bool, str]:

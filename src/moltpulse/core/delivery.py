@@ -3,9 +3,8 @@
 import json
 import os
 import smtplib
-import sys
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
@@ -242,7 +241,6 @@ def format_report_markdown(report: schema.Report) -> str:
             title = item.get("title") or item.get("text", "")[:80]
             url = item.get("url") or item.get("source_url", "")
             source = item.get("source_name", "")
-            score = item.get("score", 0)
 
             if url:
                 lines.append(f"- [{title}]({url})")

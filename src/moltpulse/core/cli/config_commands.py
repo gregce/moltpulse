@@ -6,8 +6,7 @@ import sys
 from typing import Optional
 
 from ..lib import env
-from ..lib.key_validation import test_key, test_all_keys
-
+from ..lib.key_validation import test_all_keys, test_key
 
 # ANSI color codes
 GREEN = "\033[32m"

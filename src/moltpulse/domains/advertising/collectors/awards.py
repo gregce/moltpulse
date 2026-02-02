@@ -4,11 +4,11 @@ import hashlib
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from moltpulse.core.collector_base import AwardsCollector as AwardsCollectorBase, CollectorResult
-from moltpulse.core.lib import http, schema
-from moltpulse.core.profile_loader import ProfileConfig
 from moltpulse.collectors.web_scraper import WebScraperCollector
-
+from moltpulse.core.collector_base import AwardsCollector as AwardsCollectorBase
+from moltpulse.core.collector_base import CollectorResult
+from moltpulse.core.lib import schema
+from moltpulse.core.profile_loader import ProfileConfig
 
 # Known award shows with their scraping configurations
 AWARD_SHOWS = {
@@ -129,8 +129,9 @@ class AwardsCollector(AwardsCollectorBase):
         For now, returns placeholder data structure.
         """
         items = []
-        show_name = show_config["name"]
-        show_url = show_config["url"]
+        # These will be used when scraping is implemented
+        _show_name = show_config["name"]  # noqa: F841
+        _show_url = show_config["url"]  # noqa: F841
 
         # This is where we would implement actual scraping
         # For now, search for award news via RSS/news collectors would fill this

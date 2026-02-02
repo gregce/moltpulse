@@ -1,13 +1,12 @@
 """Financial data collector using Alpha Vantage API."""
 
+import hashlib
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-import hashlib
 
-from moltpulse.core.collector_base import Collector, CollectorResult, FinancialCollector
+from moltpulse.core.collector_base import CollectorResult, FinancialCollector
 from moltpulse.core.lib import http, schema
 from moltpulse.core.profile_loader import ProfileConfig
-
 
 ALPHA_VANTAGE_BASE_URL = "https://www.alphavantage.co/query"
 
@@ -102,7 +101,6 @@ class AlphaVantageCollector(FinancialCollector):
 
         # Alpha Vantage uses numbered keys like "05. price"
         price = quote.get("05. price")
-        change = quote.get("09. change")
         change_pct = quote.get("10. change percent")
         latest_day = quote.get("07. latest trading day")
 

@@ -1,7 +1,7 @@
 """Popularity-aware scoring for Moltos."""
 
 import math
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from . import dates, schema
 

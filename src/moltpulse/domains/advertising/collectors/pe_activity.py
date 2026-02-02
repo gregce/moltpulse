@@ -1,14 +1,14 @@
 """Private equity and M&A activity collector for advertising domain."""
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote_plus
 
-from moltpulse.core.collector_base import PEActivityCollector as PEActivityCollectorBase, CollectorResult
+from moltpulse.core.collector_base import CollectorResult
+from moltpulse.core.collector_base import PEActivityCollector as PEActivityCollectorBase
 from moltpulse.core.lib import http, schema
 from moltpulse.core.profile_loader import ProfileConfig
-
 
 # Key PE firms active in advertising/marketing
 PE_FIRMS = [

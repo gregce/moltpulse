@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Dict, List
 
 from .lib import schema
 from .profile_loader import ProfileConfig
@@ -91,7 +91,7 @@ class ReportGenerator(ABC):
 
                     parsed = urlparse(url)
                     source_name = parsed.netloc.replace("www.", "")
-                except:
+                except Exception:
                     source_name = "Unknown"
 
             sources.append(

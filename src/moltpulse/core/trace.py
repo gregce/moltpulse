@@ -5,6 +5,7 @@ and overall run metrics. Supports JSON export for OpenClaw integration.
 """
 
 import json
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -270,8 +271,6 @@ class RunTrace:
 
 
 # Thread-local storage for current collector trace
-import threading
-
 _trace_context = threading.local()
 
 
