@@ -29,9 +29,111 @@ from core.profile_loader import load_profile, list_profiles
 from core.orchestrator import Orchestrator
 from core.delivery import deliver_report
 from core.lib import env
-from core.cli.config_commands import add_config_parser
+from core.cli.config_commands import add_config_parser, supports_color
 from core.cli.domain_commands import add_domain_parser
 from core.cli.profile_commands import add_profile_parser
+
+
+# ASCII Art Logo
+LOGO = r"""
+ __  __       _ _   ____        _
+|  \/  | ___ | | |_|  _ \ _   _| |___  ___
+| |\/| |/ _ \| | __| |_) | | | | / __|/ _ \
+| |  | | (_) | | |_|  __/| |_| | \__ \  __/
+|_|  |_|\___/|_|\__|_|    \__,_|_|___/\___|
+"""
+
+# ANSI color codes
+GREEN = "\033[32m"
+CYAN = "\033[36m"
+YELLOW = "\033[33m"
+DIM = "\033[2m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+
+def print_welcome() -> None:
+    """Print the welcome screen with logo and usage examples."""
+    use_color = supports_color()
+
+    def c(text: str, color: str) -> str:
+        return f"{color}{text}{RESET}" if use_color else text
+
+    # Logo in green
+    print(c(LOGO, GREEN))
+
+    # Description
+    print("MoltPulse is a domain-agnostic industry intelligence framework that")
+    print("aggregates news, financial data, social signals, and M&A activity into")
+    print("customizable reports for any industry domain.")
+    print()
+
+    # Usage section
+    print(c("USAGE", YELLOW))
+    print()
+    print(f"  {c('moltpulse', CYAN)} [command] [--flags]")
+    print()
+
+    # Examples section
+    print(c("EXAMPLES", YELLOW))
+    print()
+
+    # Config examples
+    print(c("  # Check configuration status and available collectors", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('config', GREEN)}")
+    print()
+
+    print(c("  # Configure API keys interactively", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('config set', GREEN)}")
+    print()
+
+    print(c("  # Validate all configured API keys", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('config test', GREEN)}")
+    print()
+
+    # Domain examples
+    print(c("  # List available domains", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('domain list', GREEN)}")
+    print()
+
+    print(c("  # Create a new domain", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('domain create', GREEN)} healthcare {c('--display-name', CYAN)} \"Healthcare Intelligence\"")
+    print()
+
+    # Profile examples
+    print(c("  # List profiles in a domain", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('profile list', GREEN)} advertising")
+    print()
+
+    print(c("  # Show profile details", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('profile show', GREEN)} advertising ricki")
+    print()
+
+    # Run examples
+    print(c("  # Generate a daily brief", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--profile', CYAN)}=ricki {c('daily', GREEN)}")
+    print()
+
+    print(c("  # Generate weekly digest and deliver via configured channel", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--profile', CYAN)}=ricki {c('weekly', GREEN)} {c('--deliver', CYAN)}")
+    print()
+
+    print(c("  # Deep fundraising analysis with JSON output", DIM))
+    print(f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--deep', CYAN)} {c('fundraising', GREEN)} {c('--output', CYAN)}=json")
+    print()
+
+    # Commands section
+    print(c("COMMANDS", YELLOW))
+    print()
+    print(f"  {c('config', GREEN)}   Manage API keys and settings")
+    print(f"  {c('domain', GREEN)}   Manage domain instances (advertising, healthcare, etc.)")
+    print(f"  {c('profile', GREEN)}  Manage interest profiles within domains")
+    print(f"  {c('run', GREEN)}      Generate intelligence reports")
+    print()
+
+    # Help hint
+    print(f"Run {c('moltpulse <command> --help', CYAN)} for more information on a command.")
+    print()
 
 
 def add_run_parser(subparsers: argparse._SubParsersAction) -> None:
@@ -477,9 +579,9 @@ def main() -> int:
     args = parse_args()
 
     if not args.command:
-        print("Error: Please specify a command (run, domain, profile)")
-        print("Use --help for usage information")
-        return 1
+        # No command specified - show welcome screen
+        print_welcome()
+        return 0
 
     # Execute command
     if hasattr(args, "func"):
