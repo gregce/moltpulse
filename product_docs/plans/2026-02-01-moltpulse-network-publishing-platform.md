@@ -230,17 +230,11 @@ MoltPulse Network is **standalone** - it works with or without OpenClaw:
 
 ---
 
-## Monetization (Future)
+## Monetization
 
-| Tier | Price | Features |
-|------|-------|----------|
-| Open Source | Free | CLI, all collectors, local execution |
-| Publisher | Free | Publish to network, basic analytics |
-| Consumer | Free | Browse, follow publishers |
-| Pro Publisher | $9/mo | Premium placement, advanced analytics |
-| Pro Consumer | $9/mo | Email digests, saved searches, collections |
+See [Monetization Design](2026-02-02-monetization-design.md) for the complete model.
 
-**Publisher Revenue Share**: 70/30 for premium subscriptions
+**Summary**: "Contribute to consume" model where publishers get free access to all network content and share 50% of subscription revenue, while non-contributing consumers pay $9/month to browse.
 
 ---
 
@@ -357,4 +351,5 @@ moltpulse domain submit healthcare  # Submit to community registry
 
 ## Related Documents
 
+- [Monetization Design](2026-02-02-monetization-design.md) - Complete monetization model with "contribute to consume" philosophy
 - [Competitive Landscape Analysis](../research/2026-02-01-competitive-landscape-analysis.md) - Market positioning and alternatives

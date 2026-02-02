@@ -465,7 +465,7 @@ class TestSectionInsightsAndRecommendations:
             mock_call.side_effect = [
                 "Executive summary",
                 "Section insight",
-                "1. Recommendation one\n2. Recommendation two\n3. Recommendation three",
+                "1. Target executives during the transition period for outreach\n2. Approach new market entrants to build relationships\n3. Time your outreach to coincide with major campaigns",
             ]
             with patch.dict(os.environ, {"OPENCLAW_GATEWAY_URL": "http://localhost:8080"}):
                 enhance_report(report, mode="openclaw")
@@ -558,3 +558,22 @@ class TestParseRecommendations:
         result = _parse_recommendations(text)
         assert len(result) == 1
         assert "proper recommendation" in result[0]
+
+    def test_filters_markdown_headers_and_separators(self):
+        """Should filter out markdown headers and horizontal rules."""
+        from moltpulse.core.llm_enhance import _parse_recommendations
+
+        text = """--
+
+## Recommendations
+
+1. **Target executives during the transition period.** This is an important recommendation.
+2. Approach new market entrants to build strong relationships early.
+3. Time your outreach to coincide with their major campaign launches."""
+
+        result = _parse_recommendations(text)
+        # Should get 3 recommendations, not include "--" or "## Recommendations"
+        assert len(result) == 3
+        assert not any("--" in r for r in result)
+        assert not any("##" in r for r in result)
+        assert "Target executives" in result[0] or "transition" in result[0]

@@ -412,23 +412,47 @@ def _parse_recommendations(text: str) -> list[str]:
 
     recommendations = []
 
-    # Match numbered items like "1. ...", "1) ...", "- ..."
-    pattern = r"(?:^|\n)\s*(?:\d+[\.\)]\s*|\-\s*)(.+?)(?=\n\s*(?:\d+[\.\)]|\-)|$)"
-    matches = re.findall(pattern, text, re.DOTALL)
+    # Pre-clean the text: remove markdown headers and horizontal rules
+    clean_lines = []
+    for line in text.split("\n"):
+        stripped = line.strip()
+        # Skip markdown headers
+        if stripped.startswith("#"):
+            continue
+        # Skip horizontal rules (---, ***, ___)
+        if re.match(r"^[-*_]{2,}\s*$", stripped):
+            continue
+        # Skip empty lines
+        if not stripped:
+            continue
+        clean_lines.append(line)
+
+    clean_text = "\n".join(clean_lines)
+
+    # Match numbered items like "1. ...", "1) ...", "- ..." but not standalone dashes
+    pattern = r"(?:^|\n)\s*(?:\d+[\.\)]\s+)(.+?)(?=\n\s*\d+[\.\)]|$)"
+    matches = re.findall(pattern, clean_text, re.DOTALL)
 
     for match in matches:
         rec = match.strip()
-        if rec and len(rec) > 10:  # Filter out very short matches
+        # Filter: must be >20 chars, not just markdown formatting
+        if rec and len(rec) > 20 and not rec.startswith("#"):
+            # Clean up any bold markers at the start
+            rec = re.sub(r"^\*\*(.+?)\*\*", r"\1", rec)
             recommendations.append(rec)
 
     # If regex didn't work, try line-by-line parsing
     if not recommendations:
-        for line in text.split("\n"):
+        for line in clean_lines:
             line = line.strip()
+            # Skip if it looks like a header or separator
+            if line.startswith("#") or re.match(r"^[-*_]{2,}$", line):
+                continue
             # Remove leading numbers/bullets
-            clean = re.sub(r"^\d+[\.\)]\s*", "", line)
-            clean = re.sub(r"^[\-\*]\s*", "", clean)
-            if clean and len(clean) > 10:
+            clean = re.sub(r"^\d+[\.\)]\s+", "", line)
+            clean = re.sub(r"^[\-\*]\s+", "", clean)
+            # Filter: must be >20 chars
+            if clean and len(clean) > 20:
                 recommendations.append(clean)
 
     return recommendations[:5]  # Limit to 5
