@@ -18,8 +18,8 @@ Usage:
 """
 
 import argparse
-import re
 import json
+import re
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -103,7 +103,9 @@ def print_welcome() -> None:
     print()
 
     print(c("  # Create a new domain", DIM))
-    print(f"  {c('moltpulse', CYAN)} {c('domain create', GREEN)} healthcare {c('--display-name', CYAN)} \"Healthcare Intelligence\"")
+    print(
+        f'  {c("moltpulse", CYAN)} {c("domain create", GREEN)} healthcare {c("--display-name", CYAN)} "Healthcare Intelligence"'
+    )
     print()
 
     # Profile examples
@@ -117,15 +119,21 @@ def print_welcome() -> None:
 
     # Run examples
     print(c("  # Generate a daily brief", DIM))
-    print(f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--profile', CYAN)}=ricki {c('daily', GREEN)}")
+    print(
+        f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--profile', CYAN)}=ricki {c('daily', GREEN)}"
+    )
     print()
 
     print(c("  # Generate weekly digest and deliver via configured channel", DIM))
-    print(f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--profile', CYAN)}=ricki {c('weekly', GREEN)} {c('--deliver', CYAN)}")
+    print(
+        f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--profile', CYAN)}=ricki {c('weekly', GREEN)} {c('--deliver', CYAN)}"
+    )
     print()
 
     print(c("  # Deep fundraising analysis with JSON output", DIM))
-    print(f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--deep', CYAN)} {c('fundraising', GREEN)} {c('--output', CYAN)}=json")
+    print(
+        f"  {c('moltpulse', CYAN)} {c('run', GREEN)} {c('--domain', CYAN)}=advertising {c('--deep', CYAN)} {c('fundraising', GREEN)} {c('--output', CYAN)}=json"
+    )
     print()
 
     # Commands section
@@ -231,7 +239,8 @@ Examples:
     )
 
     run_parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         help="Verbose output",
     )
@@ -254,7 +263,8 @@ Examples:
     )
 
     run_parser.add_argument(
-        "--quiet", "-q",
+        "--quiet",
+        "-q",
         action="store_true",
         help="Suppress progress output (for cron/CI)",
     )
@@ -293,7 +303,9 @@ Examples:
     )
 
     # Report type subcommands
-    report_subparsers = run_parser.add_subparsers(dest="report_type", help="Report type to generate")
+    report_subparsers = run_parser.add_subparsers(
+        dest="report_type", help="Report type to generate"
+    )
 
     # Daily brief
     daily_parser = report_subparsers.add_parser("daily", help="Generate daily brief")
@@ -312,7 +324,9 @@ Examples:
     )
 
     # Fundraising outlook
-    fundraising_parser = report_subparsers.add_parser("fundraising", help="Generate fundraising outlook")
+    fundraising_parser = report_subparsers.add_parser(
+        "fundraising", help="Generate fundraising outlook"
+    )
     fundraising_parser.add_argument(
         "--horizon",
         choices=["6m", "1y", "3y", "all"],
@@ -348,7 +362,8 @@ Examples:
 
     # Add --version flag
     parser.add_argument(
-        "-V", "--version",
+        "-V",
+        "--version",
         action="version",
         version=f"%(prog)s {__version__}",
     )
@@ -428,7 +443,7 @@ def format_compact(report: dict) -> str:
         lines.append("-" * 40)
         # Strip any existing markdown headers from LLM-generated summary
         exec_summary = report["executive_summary"]
-        exec_summary = re.sub(r'^#{1,3}\s+.*\n*', '', exec_summary, flags=re.MULTILINE).strip()
+        exec_summary = re.sub(r"^#{1,3}\s+.*\n*", "", exec_summary, flags=re.MULTILINE).strip()
         lines.append(exec_summary)
         lines.append("")
 
@@ -456,7 +471,9 @@ def format_compact(report: dict) -> str:
                 elif "title" in item and "url" in item:
                     # News item
                     lines.append(f"  - {item.get('title', '')[:60]}...")
-                    lines.append(f"    [{item.get('source_name', 'Source')}]({item.get('url', '')})")
+                    lines.append(
+                        f"    [{item.get('source_name', 'Source')}]({item.get('url', '')})"
+                    )
 
                 elif "author" in item or "author_handle" in item:
                     # Social item
@@ -474,11 +491,15 @@ def format_compact(report: dict) -> str:
 
                 elif "trend" in item:
                     # Trend item
-                    lines.append(f"  - {item.get('trend')}: {item.get('pitch_angle', item.get('mentions', ''))}")
+                    lines.append(
+                        f"  - {item.get('trend')}: {item.get('pitch_angle', item.get('mentions', ''))}"
+                    )
 
                 elif "timeframe" in item:
                     # Outlook item
-                    lines.append(f"  {item.get('timeframe')} ({item.get('confidence', 'N/A')} confidence)")
+                    lines.append(
+                        f"  {item.get('timeframe')} ({item.get('confidence', 'N/A')} confidence)"
+                    )
                     lines.append(f"  {item.get('summary', '')[:100]}...")
 
                 else:
@@ -506,7 +527,11 @@ def format_compact(report: dict) -> str:
         lines.append(f"\n{'=' * 60}")
         lines.append("SOURCES:")
         for i, source in enumerate(sources[:10], 1):
-            name = source.get("name", "Source") if isinstance(source, dict) else getattr(source, "name", "Source")
+            name = (
+                source.get("name", "Source")
+                if isinstance(source, dict)
+                else getattr(source, "name", "Source")
+            )
             url = source.get("url", "") if isinstance(source, dict) else getattr(source, "url", "")
             lines.append(f"  {i}. [{name}]({url})")
         if len(sources) > 10:
@@ -533,7 +558,7 @@ def format_markdown(report: dict) -> str:
         lines.append("")
         # Strip any existing markdown headers from LLM-generated summary
         exec_summary = report["executive_summary"]
-        exec_summary = re.sub(r'^#{1,3}\s+.*\n+', '', exec_summary, flags=re.MULTILINE).strip()
+        exec_summary = re.sub(r"^#{1,3}\s+.*\n+", "", exec_summary, flags=re.MULTILINE).strip()
         lines.append(exec_summary)
         lines.append("")
 
@@ -609,7 +634,11 @@ def format_markdown(report: dict) -> str:
         lines.append("## Sources")
         lines.append("")
         for i, source in enumerate(sources, 1):
-            name = source.get("name", "Source") if isinstance(source, dict) else getattr(source, "name", "Source")
+            name = (
+                source.get("name", "Source")
+                if isinstance(source, dict)
+                else getattr(source, "name", "Source")
+            )
             url = source.get("url", "") if isinstance(source, dict) else getattr(source, "url", "")
             lines.append(f"{i}. [{name}]({url})")
 
@@ -659,6 +688,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     if args.from_date:
         try:
             from datetime import datetime as dt
+
             from_dt = dt.strptime(args.from_date, "%Y-%m-%d")
             to_dt = dt.strptime(args.to_date, "%Y-%m-%d") if args.to_date else dt.now()
             days = (to_dt - from_dt).days
@@ -683,10 +713,10 @@ def cmd_run(args: argparse.Namespace) -> int:
         days=days,
         collectors=collectors_list,
         exclude_collectors=exclude_list,
-        no_cache=getattr(args, 'no_cache', False),
-        limit=getattr(args, 'limit', None),
-        retry=getattr(args, 'retry', 0),
-        timeout=getattr(args, 'timeout', None),
+        no_cache=getattr(args, "no_cache", False),
+        limit=getattr(args, "limit", None),
+        retry=getattr(args, "retry", 0),
+        timeout=getattr(args, "timeout", None),
     )
 
     # Dry run - just show configuration and preflight
@@ -703,13 +733,13 @@ def cmd_run(args: argparse.Namespace) -> int:
             print(f"Collectors (include): {', '.join(collectors_list)}")
         if exclude_list:
             print(f"Collectors (exclude): {', '.join(exclude_list)}")
-        if getattr(args, 'limit', None):
+        if getattr(args, "limit", None):
             print(f"Item limit: {args.limit}")
-        if getattr(args, 'no_cache', False):
+        if getattr(args, "no_cache", False):
             print("Cache: DISABLED (--no-cache)")
-        if getattr(args, 'retry', 0) > 0:
+        if getattr(args, "retry", 0) > 0:
             print(f"Retries: {args.retry}")
-        if getattr(args, 'timeout', None):
+        if getattr(args, "timeout", None):
             print(f"Timeout: {args.timeout}s")
 
         # Show preflight status
@@ -725,8 +755,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     # Determine if we should show progress
     # Suppress for: --quiet, JSON output with --no-deliver
     show_progress = not (
-        getattr(args, 'quiet', False) or
-        (args.output == "json" and args.no_deliver)
+        getattr(args, "quiet", False) or (args.output == "json" and args.no_deliver)
     )
 
     # Run collection and report generation
@@ -745,8 +774,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             return 1
 
         # Enhance report with LLM (unless disabled)
-        skip_llm = getattr(args, 'no_llm', False)
-        llm_mode = getattr(args, 'llm_mode', 'auto')
+        skip_llm = getattr(args, "no_llm", False)
+        llm_mode = getattr(args, "llm_mode", "auto")
         if not skip_llm and profile.is_llm_enabled():
             with console.status("[purple]Enhancing report with AI insights...[/]", spinner="dots"):
                 enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
@@ -765,6 +794,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"Error generating report: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
