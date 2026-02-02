@@ -1,7 +1,6 @@
 """Weekly digest report generator for advertising domain."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from moltpulse.core.lib import schema
 from moltpulse.core.report_base import WeeklyDigestGenerator
@@ -98,8 +97,6 @@ class WeeklyDigestReport(WeeklyDigestGenerator):
                 "change_pct": item.change_pct,
                 "source_url": item.source_url,
             })
-
-        avg_change = total_change / len(items) if items else 0
 
         return schema.ReportSection(
             title="MARKET OVERVIEW",

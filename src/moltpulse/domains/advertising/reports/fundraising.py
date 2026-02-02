@@ -1,7 +1,7 @@
 """Fundraising outlook report for nonprofit sector targeting advertising industry."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List
+from datetime import datetime
+from typing import Dict, List
 
 from moltpulse.core.lib import schema
 from moltpulse.core.report_base import FundraisingReportGenerator
