@@ -34,6 +34,7 @@ from moltpulse.core.domain_loader import list_domains, load_domain
 from moltpulse.core.llm_enhance import enhance_report
 from moltpulse.core.orchestrator import Orchestrator
 from moltpulse.core.profile_loader import list_profiles, load_profile
+from moltpulse.core.ui import console
 
 # ASCII Art Logo
 LOGO = r"""
@@ -746,7 +747,12 @@ def cmd_run(args: argparse.Namespace) -> int:
         # Enhance report with LLM (unless disabled)
         skip_llm = getattr(args, 'no_llm', False)
         llm_mode = getattr(args, 'llm_mode', 'auto')
-        enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
+        if not skip_llm and profile.is_llm_enabled():
+            with console.status("[purple]Enhancing report with AI insights...[/]", spinner="dots"):
+                enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
+            console.print("[green]✓[/] AI enhancement complete")
+        else:
+            enhance_report(result.report, mode=llm_mode, skip_llm=skip_llm, profile=profile)
 
         # Convert report to dict for output
         report_dict = result.report.to_dict()
