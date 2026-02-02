@@ -361,12 +361,61 @@ moltpulse run --domain=advertising --profile=ricki --deliver daily
 
 ## Development
 
-```bash
-# Run tests
-uv run python -m pytest tests/
+### Setup
 
-# Check collector status
-moltpulse config
+```bash
+# Clone and setup
+git clone https://github.com/gregce/moltpulse.git
+cd moltpulse
+
+# Install uv if you don't have it
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies (including dev tools)
+uv sync --all-extras
+
+# Verify installation
+uv run moltpulse --version
+```
+
+### Common Commands
+
+```bash
+# Run from source (always uses latest code)
+uv run moltpulse run --domain=advertising --profile=ricki daily
+
+# Run tests
+uv run pytest tests/ -v
+
+# Run specific test file
+uv run pytest tests/test_scoring.py -v
+
+# Run with coverage
+uv run pytest tests/ --cov=moltpulse
+
+# Lint and format
+uv run ruff check src/
+uv run ruff format src/
+
+# Reinstall after pyproject.toml changes
+uv sync
+
+# Force full reinstall
+uv sync --reinstall
+```
+
+### Project Structure
+
+```
+moltpulse/
+├── src/moltpulse/       # Main package
+│   ├── cli.py           # CLI entry point
+│   ├── core/            # Core modules (orchestrator, scoring, delivery)
+│   ├── collectors/      # Data source collectors
+│   └── domains/         # Domain configurations
+├── tests/               # Test suite
+├── docs/                # Documentation
+└── pyproject.toml       # Project config
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines, including:
