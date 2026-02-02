@@ -12,6 +12,9 @@ from typing import Optional
 # Check if we're in a real terminal (not captured by Claude Code)
 IS_TTY = sys.stderr.isatty()
 
+# Global lock for stderr writes to prevent corruption from parallel collectors
+_stderr_lock = threading.Lock()
+
 
 class Colors:
     """ANSI color codes for terminal output."""
@@ -46,8 +49,9 @@ class Spinner:
         """Animation loop running in background thread."""
         while self.running:
             frame = SPINNER_FRAMES[self.frame_idx % len(SPINNER_FRAMES)]
-            sys.stderr.write(f"\r{self.color}{frame}{Colors.RESET} {self.message}  ")
-            sys.stderr.flush()
+            with _stderr_lock:
+                sys.stderr.write(f"\r{self.color}{frame}{Colors.RESET} {self.message}  ")
+                sys.stderr.flush()
             self.frame_idx += 1
             time.sleep(0.08)
 
@@ -61,28 +65,31 @@ class Spinner:
         else:
             # Not a TTY (Claude Code, pipes) - just print once
             if not self.shown_static:
-                sys.stderr.write(f"⏳ {self.message}\n")
-                sys.stderr.flush()
+                with _stderr_lock:
+                    sys.stderr.write(f"⏳ {self.message}\n")
+                    sys.stderr.flush()
                 self.shown_static = True
 
     def update(self, message: str) -> None:
         """Update the spinner message."""
         self.message = message
         if not IS_TTY and not self.shown_static:
-            sys.stderr.write(f"⏳ {message}\n")
-            sys.stderr.flush()
+            with _stderr_lock:
+                sys.stderr.write(f"⏳ {message}\n")
+                sys.stderr.flush()
 
     def stop(self, final_message: str = "") -> None:
         """Stop the spinner and show final message."""
         self.running = False
         if self.thread:
             self.thread.join(timeout=0.2)
-        if IS_TTY:
-            # Clear the line in real terminal
-            sys.stderr.write("\r" + " " * 80 + "\r")
-        if final_message:
-            sys.stderr.write(f"✓ {final_message}\n")
-        sys.stderr.flush()
+        with _stderr_lock:
+            if IS_TTY:
+                # Clear the line in real terminal
+                sys.stderr.write("\r" + " " * 80 + "\r")
+            if final_message:
+                sys.stderr.write(f"✓ {final_message}\n")
+            sys.stderr.flush()
 
 
 class RunProgress:
@@ -98,14 +105,15 @@ class RunProgress:
 
     def show_header(self) -> None:
         """Show run header."""
-        if IS_TTY:
-            sys.stderr.write(
-                f"\n{Colors.PURPLE}{Colors.BOLD}MoltPulse{Colors.RESET} "
-                f"{Colors.DIM}· {self.domain}/{self.profile} · {self.report_type}{Colors.RESET}\n\n"
-            )
-        else:
-            sys.stderr.write(f"MoltPulse · {self.domain}/{self.profile} · {self.report_type}\n")
-        sys.stderr.flush()
+        with _stderr_lock:
+            if IS_TTY:
+                sys.stderr.write(
+                    f"\n{Colors.PURPLE}{Colors.BOLD}MoltPulse{Colors.RESET} "
+                    f"{Colors.DIM}· {self.domain}/{self.profile} · {self.report_type}{Colors.RESET}\n\n"
+                )
+            else:
+                sys.stderr.write(f"MoltPulse · {self.domain}/{self.profile} · {self.report_type}\n")
+            sys.stderr.flush()
 
     def start_collector(self, name: str, collector_type: str) -> None:
         """Show spinner for collector starting."""
@@ -132,18 +140,19 @@ class RunProgress:
             duration_str = f"{duration_ms}ms"
 
         # Show result
-        if success:
-            if IS_TTY:
-                sys.stderr.write(f"✓ {name}: {item_count} items ({duration_str})\n")
+        with _stderr_lock:
+            if success:
+                if IS_TTY:
+                    sys.stderr.write(f"✓ {name}: {item_count} items ({duration_str})\n")
+                else:
+                    sys.stderr.write(f"✓ {name}: {item_count} items ({duration_str})\n")
             else:
-                sys.stderr.write(f"✓ {name}: {item_count} items ({duration_str})\n")
-        else:
-            error_msg = f" - {error}" if error else ""
-            if IS_TTY:
-                sys.stderr.write(f"{Colors.RED}✗{Colors.RESET} {name}: failed{error_msg}\n")
-            else:
-                sys.stderr.write(f"✗ {name}: failed{error_msg}\n")
-        sys.stderr.flush()
+                error_msg = f" - {error}" if error else ""
+                if IS_TTY:
+                    sys.stderr.write(f"{Colors.RED}✗{Colors.RESET} {name}: failed{error_msg}\n")
+                else:
+                    sys.stderr.write(f"✗ {name}: failed{error_msg}\n")
+            sys.stderr.flush()
 
         # Track result
         self.collector_results.append({
@@ -166,24 +175,26 @@ class RunProgress:
     def show_complete(self, total_items: int) -> None:
         """Show completion summary."""
         elapsed = time.time() - self.start_time
-        if IS_TTY:
-            sys.stderr.write(
-                f"\n{Colors.GREEN}{Colors.BOLD}✓ Run complete{Colors.RESET} "
-                f"{Colors.DIM}({elapsed:.1f}s) - {total_items} items{Colors.RESET}\n\n"
-            )
-        else:
-            sys.stderr.write(f"\n✓ Run complete ({elapsed:.1f}s) - {total_items} items\n")
-        sys.stderr.flush()
+        with _stderr_lock:
+            if IS_TTY:
+                sys.stderr.write(
+                    f"\n{Colors.GREEN}{Colors.BOLD}✓ Run complete{Colors.RESET} "
+                    f"{Colors.DIM}({elapsed:.1f}s) - {total_items} items{Colors.RESET}\n\n"
+                )
+            else:
+                sys.stderr.write(f"\n✓ Run complete ({elapsed:.1f}s) - {total_items} items\n")
+            sys.stderr.flush()
 
     def show_error(self, message: str) -> None:
         """Show error message."""
         if self.spinner:
             self.spinner.stop()
-        if IS_TTY:
-            sys.stderr.write(f"{Colors.RED}✗ Error:{Colors.RESET} {message}\n")
-        else:
-            sys.stderr.write(f"✗ Error: {message}\n")
-        sys.stderr.flush()
+        with _stderr_lock:
+            if IS_TTY:
+                sys.stderr.write(f"{Colors.RED}✗ Error:{Colors.RESET} {message}\n")
+            else:
+                sys.stderr.write(f"✗ Error: {message}\n")
+            sys.stderr.flush()
 
     def _color_for_type(self, collector_type: str) -> str:
         """Get color for collector type."""
@@ -199,32 +210,33 @@ class RunProgress:
 
 def print_preflight_status(available: list, unavailable: list) -> None:
     """Print preflight check status."""
-    sys.stderr.write("\nCollector Status:\n")
+    with _stderr_lock:
+        sys.stderr.write("\nCollector Status:\n")
 
-    for item in available:
-        name = item.get("name", "Unknown")
-        ctype = item.get("type", "")
-        if IS_TTY:
-            sys.stderr.write(f"  {Colors.GREEN}✓{Colors.RESET} {name} ({ctype})\n")
-        else:
-            sys.stderr.write(f"  ✓ {name} ({ctype})\n")
-
-    for item in unavailable:
-        name = item.get("name", "Unknown")
-        if "missing_keys" in item:
-            if item.get("requires_any"):
-                keys = " or ".join(item["missing_keys"])
-                msg = f"needs one of: {keys}"
+        for item in available:
+            name = item.get("name", "Unknown")
+            ctype = item.get("type", "")
+            if IS_TTY:
+                sys.stderr.write(f"  {Colors.GREEN}✓{Colors.RESET} {name} ({ctype})\n")
             else:
-                keys = ", ".join(item["missing_keys"])
-                msg = f"missing: {keys}"
-        else:
-            msg = item.get("reason", "unavailable")
+                sys.stderr.write(f"  ✓ {name} ({ctype})\n")
 
-        if IS_TTY:
-            sys.stderr.write(f"  {Colors.RED}✗{Colors.RESET} {name} ({msg})\n")
-        else:
-            sys.stderr.write(f"  ✗ {name} ({msg})\n")
+        for item in unavailable:
+            name = item.get("name", "Unknown")
+            if "missing_keys" in item:
+                if item.get("requires_any"):
+                    keys = " or ".join(item["missing_keys"])
+                    msg = f"needs one of: {keys}"
+                else:
+                    keys = ", ".join(item["missing_keys"])
+                    msg = f"missing: {keys}"
+            else:
+                msg = item.get("reason", "unavailable")
 
-    sys.stderr.write("\n")
-    sys.stderr.flush()
+            if IS_TTY:
+                sys.stderr.write(f"  {Colors.RED}✗{Colors.RESET} {name} ({msg})\n")
+            else:
+                sys.stderr.write(f"  ✗ {name} ({msg})\n")
+
+        sys.stderr.write("\n")
+        sys.stderr.flush()

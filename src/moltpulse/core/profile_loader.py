@@ -58,21 +58,27 @@ class ProfileConfig:
 
         result = []
         for entity in domain_entities:
+            # Handle both dict entities and string entities
+            if isinstance(entity, str):
+                # Convert string to dict format
+                entity = {"name": entity}
+
             symbol = entity.get("symbol", "")
             name = entity.get("name", "")
 
             if symbol in exclude or name in exclude:
                 continue
 
-            # Set priority
+            # Set priority - make a copy to avoid mutating domain data
+            entity_copy = dict(entity)
             if symbol in priority_1 or name in priority_1:
-                entity["_priority"] = 1
+                entity_copy["_priority"] = 1
             elif symbol in priority_2 or name in priority_2:
-                entity["_priority"] = 2
+                entity_copy["_priority"] = 2
             else:
-                entity["_priority"] = 3
+                entity_copy["_priority"] = 3
 
-            result.append(entity)
+            result.append(entity_copy)
 
         # Sort by priority
         result.sort(key=lambda x: x.get("_priority", 3))

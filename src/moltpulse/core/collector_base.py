@@ -175,9 +175,13 @@ class NewsCollector(Collector):
         # Add entity names
         for entity_type in profile.domain.entity_types:
             for entity in profile.get_focused_entities(entity_type):
-                name = entity.get("name")
-                if name:
-                    keywords.append(name)
+                # Handle both dict and string entities
+                if isinstance(entity, str):
+                    keywords.append(entity)
+                else:
+                    name = entity.get("name")
+                    if name:
+                        keywords.append(name)
 
         # Add boost keywords
         keywords.extend(profile.get_boost_keywords())
