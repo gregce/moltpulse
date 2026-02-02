@@ -4,10 +4,10 @@ import hashlib
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from core.collector_base import AwardsCollector as AwardsCollectorBase, CollectorResult
-from core.lib import http, schema
-from core.profile_loader import ProfileConfig
-from collectors.web_scraper import WebScraperCollector
+from moltpulse.core.collector_base import AwardsCollector as AwardsCollectorBase, CollectorResult
+from moltpulse.core.lib import http, schema
+from moltpulse.core.profile_loader import ProfileConfig
+from moltpulse.collectors.web_scraper import WebScraperCollector
 
 
 # Known award shows with their scraping configurations

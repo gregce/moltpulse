@@ -5,9 +5,9 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
-from core.collector_base import Collector, CollectorResult
-from core.lib import schema
-from core.profile_loader import ProfileConfig
+from moltpulse.core.collector_base import Collector, CollectorResult
+from moltpulse.core.lib import schema
+from moltpulse.core.profile_loader import ProfileConfig
 
 
 class WebScraperCollector(Collector):

@@ -5,9 +5,9 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote_plus
 
-from core.collector_base import PEActivityCollector as PEActivityCollectorBase, CollectorResult
-from core.lib import http, schema
-from core.profile_loader import ProfileConfig
+from moltpulse.core.collector_base import PEActivityCollector as PEActivityCollectorBase, CollectorResult
+from moltpulse.core.lib import http, schema
+from moltpulse.core.profile_loader import ProfileConfig
 
 
 # Key PE firms active in advertising/marketing

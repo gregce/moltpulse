@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Any, Dict, List, Optional
 
-from core.collector_base import CollectorResult, RSSCollector as RSSCollectorBase
-from core.lib import http, schema
-from core.profile_loader import ProfileConfig
+from moltpulse.core.collector_base import CollectorResult, RSSCollector as RSSCollectorBase
+from moltpulse.core.lib import http, schema
+from moltpulse.core.profile_loader import ProfileConfig
 
 
 class RSSCollector(RSSCollectorBase):

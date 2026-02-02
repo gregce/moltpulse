@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from core.domain_loader import (
+from moltpulse.core.domain_loader import (
     DomainConfig,
     list_domains,
     load_domain,

@@ -2,7 +2,7 @@
 
 import pytest
 
-from core.lib.schema import (
+from moltpulse.core.lib.schema import (
     Source,
     Engagement,
     NewsItem,

@@ -4,9 +4,9 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 import hashlib
 
-from core.collector_base import Collector, CollectorResult, FinancialCollector
-from core.lib import http, schema
-from core.profile_loader import ProfileConfig
+from moltpulse.core.collector_base import Collector, CollectorResult, FinancialCollector
+from moltpulse.core.lib import http, schema
+from moltpulse.core.profile_loader import ProfileConfig
 
 
 ALPHA_VANTAGE_BASE_URL = "https://www.alphavantage.co/query"

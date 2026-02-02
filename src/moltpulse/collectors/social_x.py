@@ -5,9 +5,9 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from core.collector_base import CollectorResult, SocialCollector
-from core.lib import http, schema
-from core.profile_loader import ProfileConfig
+from moltpulse.core.collector_base import CollectorResult, SocialCollector
+from moltpulse.core.lib import http, schema
+from moltpulse.core.profile_loader import ProfileConfig
 
 
 XAI_BASE_URL = "https://api.x.ai/v1/responses"

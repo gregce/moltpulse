@@ -3,8 +3,8 @@
 import pytest
 from datetime import datetime, timedelta
 
-from core.lib.schema import NewsItem, FinancialItem, SocialItem, Engagement
-from core.lib.score import (
+from moltpulse.core.lib.schema import NewsItem, FinancialItem, SocialItem, Engagement
+from moltpulse.core.lib.score import (
     score_news_items,
     score_financial_items,
     score_social_items,
