@@ -476,10 +476,31 @@ def format_compact(report: dict) -> str:
                     )
 
                 elif "author" in item or "author_handle" in item:
-                    # Social item
-                    handle = item.get("author") or f"@{item.get('author_handle', '')}"
-                    text = item.get("text", "")[:80]
-                    lines.append(f"  {handle}: {text}...")
+                    # Social item - curated highlight format
+                    handle = item.get("author") or item.get("author_handle", "")
+                    name = item.get("author_name", "")
+                    notes = item.get("author_notes", "")
+                    text = item.get("text", "")[:200]
+                    why = item.get("why_relevant", "")
+
+                    # Author header
+                    if name and name != handle:
+                        lines.append(f"  {name} ({handle})")
+                    else:
+                        lines.append(f"  {handle}")
+
+                    # Author notes (expertise/role)
+                    if notes:
+                        lines.append(f"    {notes}")
+
+                    # Post text
+                    lines.append(f'    "{text}..."')
+
+                    # Why this matters
+                    if why:
+                        lines.append(f"    → {why}")
+
+                    lines.append("")
 
                 elif "summary" in item:
                     # PE/M&A item
@@ -588,10 +609,35 @@ def format_markdown(report: dict) -> str:
                         lines.append(f"  > {item.get('snippet')[:150]}...")
 
                 elif "author" in item or "author_handle" in item:
-                    handle = item.get("author") or f"@{item.get('author_handle', '')}"
-                    lines.append(f"- **{handle}**: {item.get('text', '')}")
-                    if item.get("url"):
-                        lines.append(f"  [View]({item.get('url')})")
+                    # Social item - rich thought leader format
+                    handle = item.get("author") or item.get("author_handle", "")
+                    name = item.get("author_name", "")
+                    notes = item.get("author_notes", "")
+                    text = item.get("text", "")
+                    url = item.get("url", "")
+                    why = item.get("why_relevant", "")
+
+                    # Author header with handle
+                    if name and name != handle:
+                        lines.append(f"### {name} ({handle})")
+                    else:
+                        lines.append(f"### {handle}")
+
+                    # Author notes (expertise/role)
+                    if notes:
+                        lines.append(f"*{notes}*")
+                    lines.append("")
+
+                    # Post text as blockquote
+                    lines.append(f"> {text}")
+                    if url:
+                        lines.append(f"> [View on X]({url})")
+                    lines.append("")
+
+                    # Why this matters
+                    if why:
+                        lines.append(f"**Why this matters:** {why}")
+                    lines.append("")
 
                 elif "summary" in item and "url" in item:
                     lines.append(f"- {item.get('summary', '')}")

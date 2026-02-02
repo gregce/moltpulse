@@ -49,8 +49,8 @@ htmlcov/
 .env.local
 *.local.yaml
 
-# Reports output
-reports/
+# Reports output (root level only, not src/*/reports/)
+/reports/
 *.report.md
 *.report.html
 *.report.json
