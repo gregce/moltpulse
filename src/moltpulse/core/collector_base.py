@@ -51,12 +51,16 @@ class Collector(ABC):
         REQUIRED_API_KEYS: List of keys that must all be present
         OPTIONAL_API_KEYS: List of keys that enhance functionality
         REQUIRES_ANY_KEY: If True, only one of REQUIRED_API_KEYS needed
+        COLLECTOR_PRIORITY: Higher values are preferred when multiple collectors
+                           of the same type exist (default: 0)
     """
 
     # API key requirements - subclasses should override
     REQUIRED_API_KEYS: List[str] = []
     OPTIONAL_API_KEYS: List[str] = []
     REQUIRES_ANY_KEY: bool = False
+    # Priority for selecting among multiple collectors of same type (higher = preferred)
+    COLLECTOR_PRIORITY: int = 0
 
     def __init__(self, config: Dict[str, Any]):
         """Initialize collector with configuration.

@@ -13,9 +13,10 @@ NEWSDATA_BASE_URL = "https://newsdata.io/api/1/news"
 
 
 class NewsDataCollector(NewsCollector):
-    """Collector for news articles via NewsData.io API."""
+    """Collector for news articles via NewsData.io API (primary)."""
 
     REQUIRED_API_KEYS = ["NEWSDATA_API_KEY"]
+    COLLECTOR_PRIORITY = 10  # Primary news collector
 
     @property
     def name(self) -> str:

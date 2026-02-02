@@ -217,7 +217,12 @@ class Orchestrator:
         print()
 
     def _load_collector(self, module_path: str, collector_type: str) -> Optional[Collector]:
-        """Load a collector from module path."""
+        """Load a collector from module path.
+
+        When a module contains multiple collector classes for the same type
+        (e.g., primary and fallback), this method prefers the one that is
+        available (has its API keys configured).
+        """
         try:
             # Add project root to path if needed
             project_root = Path(__file__).parent.parent
@@ -226,7 +231,8 @@ class Orchestrator:
 
             module = importlib.import_module(module_path)
 
-            # Look for collector class
+            # Collect all matching collectors from the module
+            candidates: List[Collector] = []
             for name in dir(module):
                 obj = getattr(module, name)
                 if (
@@ -235,12 +241,28 @@ class Orchestrator:
                     and obj is not Collector
                     and hasattr(obj, "collector_type")
                 ):
-                    # Check if this is the right type
-                    instance = obj(self.config)
-                    if instance.collector_type == collector_type or not collector_type:
-                        return instance
+                    try:
+                        instance = obj(self.config)
+                        if instance.collector_type == collector_type or not collector_type:
+                            candidates.append(instance)
+                    except TypeError:
+                        # Skip abstract classes that can't be instantiated
+                        continue
 
-            return None
+            if not candidates:
+                return None
+
+            # Sort by priority (higher first), then prefer available collectors
+            candidates.sort(key=lambda c: c.COLLECTOR_PRIORITY, reverse=True)
+
+            # Prefer the collector that is available (has API keys configured)
+            for candidate in candidates:
+                if candidate.is_available():
+                    return candidate
+
+            # If none are available, return highest priority one (for error reporting)
+            return candidates[0]
+
         except Exception as e:
             if env.is_debug():
                 print(f"[DEBUG] Collector load error: {e}", file=sys.stderr)
