@@ -115,8 +115,18 @@ def normalize_to_100(values: List[Optional[float]], default: float = 50) -> List
     return result
 
 
-def score_news_items(items: List[schema.NewsItem]) -> List[schema.NewsItem]:
-    """Compute scores for news items."""
+def score_news_items(
+    items: List[schema.NewsItem],
+    boost_keywords: Optional[List[str]] = None,
+    filter_keywords: Optional[List[str]] = None,
+) -> List[schema.NewsItem]:
+    """Compute scores for news items with optional profile keyword adjustments.
+
+    Args:
+        items: News items to score
+        boost_keywords: Keywords that increase relevance when matched
+        filter_keywords: Keywords that decrease relevance when matched
+    """
     if not items:
         return items
 
@@ -127,7 +137,28 @@ def score_news_items(items: List[schema.NewsItem]) -> List[schema.NewsItem]:
     eng_normalized = normalize_to_100(eng_raw)
 
     for i, item in enumerate(items):
-        rel_score = int(item.relevance * 100)
+        # Start with item's base relevance
+        base_relevance = item.relevance
+
+        # Apply boost/filter keyword adjustments
+        if boost_keywords or filter_keywords:
+            content = f"{item.title} {item.snippet or ''}".lower()
+
+            # Boost for matching boost keywords (+0.1 per match, max +0.3)
+            if boost_keywords:
+                boost_matches = sum(1 for kw in boost_keywords if kw.lower() in content)
+                base_relevance += min(boost_matches * 0.1, 0.3)
+
+            # Penalize for filter keywords (-0.15 per match)
+            if filter_keywords:
+                filter_matches = sum(1 for kw in filter_keywords if kw.lower() in content)
+                base_relevance -= filter_matches * 0.15
+
+            # Clamp to valid range
+            base_relevance = max(0.0, min(1.0, base_relevance))
+            item.relevance = base_relevance
+
+        rel_score = int(base_relevance * 100)
         rec_score = dates.recency_score(item.date)
         eng_score = int(eng_normalized[i]) if eng_normalized[i] is not None else 35
 

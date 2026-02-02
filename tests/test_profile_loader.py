@@ -135,8 +135,9 @@ class TestProfileConfigLLMMethods:
         assert ricki_profile.is_llm_enabled() is True
 
     def test_is_llm_enabled_default(self, default_profile):
-        """Should return True by default (no config)."""
-        assert default_profile.is_llm_enabled() is True
+        """Default profile has LLM disabled (explicit setting in default.yaml)."""
+        # Default profile explicitly sets llm.enabled: false for baseline
+        assert default_profile.is_llm_enabled() is False
 
     def test_get_llm_mode_with_config(self, ricki_profile):
         """Should return mode from config."""

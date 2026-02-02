@@ -82,7 +82,8 @@ class Spinner:
         """Stop the spinner and show final message."""
         self.running = False
         if self.thread:
-            self.thread.join(timeout=0.2)
+            self.thread.join(timeout=0.5)  # Increased from 0.2 to allow thread to exit
+            self.thread = None  # Clear reference
         with _stderr_lock:
             if IS_TTY:
                 # Clear the line in real terminal
@@ -117,6 +118,11 @@ class RunProgress:
 
     def start_collector(self, name: str, collector_type: str) -> None:
         """Show spinner for collector starting."""
+        # Stop any existing spinner before starting a new one
+        # This prevents orphaned spinner threads from accumulating
+        if self.spinner:
+            self.spinner.stop()
+
         color = self._color_for_type(collector_type)
         self.spinner = Spinner(f"{name}...", color)
         self.spinner.start()
@@ -164,6 +170,10 @@ class RunProgress:
 
     def show_processing(self) -> None:
         """Show processing phase."""
+        # Stop any existing spinner first
+        if self.spinner:
+            self.spinner.stop()
+
         self.spinner = Spinner("Processing items...", Colors.PURPLE)
         self.spinner.start()
 

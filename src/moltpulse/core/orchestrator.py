@@ -334,9 +334,19 @@ class Orchestrator:
                 items, self.from_date, self.to_date
             )
 
-            # Score items based on type
+            # Score items based on type, applying profile keyword adjustments
             if collector_type == "news":
-                items = score.score_news_items(items)
+                # Apply profile boost/filter keywords to improve relevance
+                boost_keywords = self.profile.get_boost_keywords()
+                filter_keywords = self.profile.get_filter_keywords()
+                items = score.score_news_items(
+                    items,
+                    boost_keywords=boost_keywords,
+                    filter_keywords=filter_keywords,
+                )
+                # Filter out low-relevance news items (score < 35)
+                # This helps exclude generic stock news and off-topic articles
+                items = [item for item in items if item.score >= 35]
             elif collector_type == "financial":
                 items = score.score_financial_items(items)
             elif collector_type == "social":
