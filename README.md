@@ -5,11 +5,9 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![OpenClaw Compatible](https://img.shields.io/badge/OpenClaw-compatible-green.svg)](https://github.com/openclaw/openclaw)
-[![Tests](https://img.shields.io/badge/tests-217%20passed-brightgreen.svg)](tests/)
 
 > Domain-agnostic industry intelligence framework
 
@@ -20,10 +18,10 @@ MoltPulse monitors industries, tracks market trends, and generates intelligence 
 │                              MOLTPULSE                                 │
 ├────────────────────────────────────────────────────────────────────────┤
 │                                                                        │
-│  ┌──────────┐    ┌──────────┐    ┌─────────────┐    ┌──────────┐      │
-│  │  DOMAIN  │───▶│ PROFILE  │───▶│ ORCHESTRATOR│───▶│ DELIVERY │      │
-│  │  (what)  │    │  (who)   │    │    (how)    │    │ (where)  │      │
-│  └──────────┘    └──────────┘    └─────────────┘    └──────────┘      │
+│  ┌──────────┐    ┌──────────┐    ┌─────────────┐    ┌──────────┐       │
+│  │  DOMAIN  │───▶│ PROFILE  │───▶│ ORCHESTRATOR│───▶│ DELIVERY │       │
+│  │  (what)  │    │  (who)   │    │    (how)    │    │ (where)  │       │
+│  └──────────┘    └──────────┘    └─────────────┘    └──────────┘       │
 │                                                                        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
