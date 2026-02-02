@@ -244,7 +244,7 @@ moltpulse run --domain=advertising --profile=ricki --retry=3 daily
 
 ## OpenClaw Integration
 
-MoltPulse integrates with [OpenClaw](https://github.com/openclaw/openclaw) for scheduled, automated report generation. OpenClaw (created by [@steipete](https://github.com/steipete)) is a cron-like scheduler that can run commands on a schedule and handle delivery.
+MoltPulse integrates with [OpenClaw](https://github.com/openclaw/openclaw) for scheduled, automated report generation. OpenClaw (created by [@steipete](https://github.com/steipete)) has a cron scheduler that can run commands on a schedule and OpenClaw can also handle delivery.
 
 ### How It Works
 
