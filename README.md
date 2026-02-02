@@ -12,14 +12,16 @@
 MoltPulse monitors industries, tracks market trends, and generates intelligence reports. Configure **domains** (advertising, healthcare, fintech), define **user profiles**, and schedule automated reports.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         MOLTPULSE                               │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────┐    ┌──────────┐    ┌───────────┐    ┌──────────┐  │
-│  │ DOMAIN  │───▶│ PROFILE  │───▶│ORCHESTRATOR│───▶│ DELIVERY │  │
-│  │ (what)  │    │  (who)   │    │  (how)    │    │ (where)  │  │
-│  └─────────┘    └──────────┘    └───────────┘    └──────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                              MOLTPULSE                                 │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  ┌──────────┐    ┌──────────┐    ┌─────────────┐    ┌──────────┐      │
+│  │  DOMAIN  │───▶│ PROFILE  │───▶│ ORCHESTRATOR│───▶│ DELIVERY │      │
+│  │  (what)  │    │  (who)   │    │    (how)    │    │ (where)  │      │
+│  └──────────┘    └──────────┘    └─────────────┘    └──────────┘      │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Quick Start
@@ -94,41 +96,41 @@ moltpulse run --domain=advertising --profile=ricki --deep weekly
 MoltPulse uses a collector architecture where each data source is encapsulated in a collector class. The advertising domain ships with these collectors:
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                 ADVERTISING DOMAIN COLLECTORS                       │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
-│  │ Financial        │────▶│ Alpha Vantage API                    │  │
-│  │ (stock prices)   │     │ Holding company stock performance    │  │
-│  └──────────────────┘     └──────────────────────────────────────┘  │
-│                                                                      │
-│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
-│  │ News             │────▶│ NewsData.io API (primary)            │  │
-│  │ (industry news)  │     │ NewsAPI (fallback)                   │  │
-│  └──────────────────┘     └──────────────────────────────────────┘  │
-│                                                                      │
-│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
-│  │ RSS              │────▶│ Ad Age, AdWeek, Campaign, The Drum   │  │
-│  │ (publications)   │     │ Marketing Week, Digiday, Forbes CMO  │  │
-│  └──────────────────┘     └──────────────────────────────────────┘  │
-│                                                                      │
-│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
-│  │ Social           │────▶│ xAI API with x_search tool           │  │
-│  │ (thought leaders)│     │ Tracks handles defined in profiles   │  │
-│  └──────────────────┘     └──────────────────────────────────────┘  │
-│                                                                      │
-│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
-│  │ Awards           │────▶│ Web scraping (no API key)            │  │
-│  │ (industry awards)│     │ Cannes Lions, Effies, Clios, etc.    │  │
-│  └──────────────────┘     └──────────────────────────────────────┘  │
-│                                                                      │
-│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
-│  │ PE Activity      │────▶│ Intellizence API (primary)           │  │
-│  │ (M&A tracking)   │     │ News APIs (fallback for M&A news)    │  │
-│  └──────────────────┘     └──────────────────────────────────────┘  │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                    ADVERTISING DOMAIN COLLECTORS                       │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  ┌───────────────────┐      ┌────────────────────────────────────┐    │
+│  │ Financial         │─────▶│ Alpha Vantage API                  │    │
+│  │ (stock prices)    │      │ Holding company stock performance  │    │
+│  └───────────────────┘      └────────────────────────────────────┘    │
+│                                                                        │
+│  ┌───────────────────┐      ┌────────────────────────────────────┐    │
+│  │ News              │─────▶│ NewsData.io API (primary)          │    │
+│  │ (industry news)   │      │ NewsAPI (fallback)                 │    │
+│  └───────────────────┘      └────────────────────────────────────┘    │
+│                                                                        │
+│  ┌───────────────────┐      ┌────────────────────────────────────┐    │
+│  │ RSS               │─────▶│ Ad Age, AdWeek, Campaign, The Drum │    │
+│  │ (publications)    │      │ Marketing Week, Digiday, Forbes    │    │
+│  └───────────────────┘      └────────────────────────────────────┘    │
+│                                                                        │
+│  ┌───────────────────┐      ┌────────────────────────────────────┐    │
+│  │ Social            │─────▶│ xAI API with x_search tool         │    │
+│  │ (thought leaders) │      │ Tracks handles defined in profiles │    │
+│  └───────────────────┘      └────────────────────────────────────┘    │
+│                                                                        │
+│  ┌───────────────────┐      ┌────────────────────────────────────┐    │
+│  │ Awards            │─────▶│ Web scraping (no API key)          │    │
+│  │ (industry awards) │      │ Cannes Lions, Effies, Clios, etc.  │    │
+│  └───────────────────┘      └────────────────────────────────────┘    │
+│                                                                        │
+│  ┌───────────────────┐      ┌────────────────────────────────────┐    │
+│  │ PE Activity       │─────▶│ Intellizence API (primary)         │    │
+│  │ (M&A tracking)    │      │ News APIs (fallback for M&A news)  │    │
+│  └───────────────────┘      └────────────────────────────────────┘    │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### API Keys
@@ -207,27 +209,27 @@ Collectors:
 
 ## OpenClaw Integration
 
-MoltPulse integrates with [OpenClaw](https://github.com/anthropics/openclaw) for scheduled, automated report generation. OpenClaw is Anthropic's cron-like scheduler that can run commands on a schedule and handle delivery.
+MoltPulse integrates with [OpenClaw](https://github.com/openclaw/openclaw) for scheduled, automated report generation. OpenClaw (created by [@steipete](https://github.com/steipete)) is a cron-like scheduler that can run commands on a schedule and handle delivery.
 
 ### How It Works
 
 When integrated with OpenClaw, the execution flow is:
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                    OPENCLAW ORCHESTRATION                         │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  ┌──────────┐    ┌───────────┐    ┌──────────┐    ┌──────────┐   │
-│  │ SCHEDULE │───▶│ OPENCLAW  │───▶│ MOLTPULSE│───▶│ OPENCLAW │   │
-│  │ (cron)   │    │ (trigger) │    │ (collect)│    │ (deliver)│   │
-│  └──────────┘    └───────────┘    └──────────┘    └──────────┘   │
-│       │                                                │          │
-│       ▼                                                ▼          │
-│  "0 7 * * 1-5"                                   Email/Slack/     │
-│  (7am weekdays)                                   Custom hook     │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                       OPENCLAW ORCHESTRATION                           │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  ┌──────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐      │
+│  │ SCHEDULE │───▶│ OPENCLAW  │───▶│ MOLTPULSE │───▶│ OPENCLAW  │      │
+│  │  (cron)  │    │ (trigger) │    │ (collect) │    │ (deliver) │      │
+│  └──────────┘    └───────────┘    └───────────┘    └───────────┘      │
+│       │                                                  │             │
+│       ▼                                                  ▼             │
+│  "0 7 * * 1-5"                                    Email/Slack/        │
+│  (7am weekdays)                                    Custom hook         │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **OpenClaw triggers** MoltPulse at scheduled times (e.g., 7am weekdays)
