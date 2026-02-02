@@ -16,7 +16,11 @@ XAI_BASE_URL = "https://api.x.ai/v1/responses"
 XAI_MODEL = "grok-4-1-fast"  # Required for x_search tool
 
 # Prompt template that asks for structured JSON response
-X_SEARCH_PROMPT = """You have access to real-time X (Twitter) data. Search for posts from these thought leaders: {handles}
+X_SEARCH_PROMPT = """You have access to real-time X (Twitter) data.
+
+Search for posts from EACH of these thought leaders: {handles}
+
+CRITICAL: Return a BALANCED mix of posts from DIFFERENT handles. Do NOT let any single person dominate the results. Include posts from at least 3-4 different handles if available. Aim for roughly equal representation across all thought leaders listed.
 
 Focus on posts from {from_date} to {to_date}. Find {min_items}-{max_items} high-quality, relevant posts.
 
@@ -44,7 +48,8 @@ Rules:
 - relevance is 0.0 to 1.0 (1.0 = highly relevant)
 - date must be YYYY-MM-DD format or null
 - engagement can be null if unknown
-- Prefer posts with substantive content about industry trends, insights, or predictions"""
+- Prefer posts with substantive content about industry trends, insights, or predictions
+- MUST include posts from multiple different thought leaders - diversity is required"""
 
 
 class XAICollector(SocialCollector):

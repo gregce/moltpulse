@@ -18,6 +18,7 @@ Usage:
 """
 
 import argparse
+import re
 import json
 import sys
 from datetime import datetime, timedelta
@@ -424,7 +425,10 @@ def format_compact(report: dict) -> str:
     if report.get("executive_summary"):
         lines.append("EXECUTIVE SUMMARY")
         lines.append("-" * 40)
-        lines.append(report["executive_summary"])
+        # Strip any existing markdown headers from LLM-generated summary
+        exec_summary = report["executive_summary"]
+        exec_summary = re.sub(r'^#{1,3}\s+.*\n*', '', exec_summary, flags=re.MULTILINE).strip()
+        lines.append(exec_summary)
         lines.append("")
 
     # Sections
@@ -526,7 +530,10 @@ def format_markdown(report: dict) -> str:
     if report.get("executive_summary"):
         lines.append("## Executive Summary")
         lines.append("")
-        lines.append(report["executive_summary"])
+        # Strip any existing markdown headers from LLM-generated summary
+        exec_summary = report["executive_summary"]
+        exec_summary = re.sub(r'^#{1,3}\s+.*\n+', '', exec_summary, flags=re.MULTILINE).strip()
+        lines.append(exec_summary)
         lines.append("")
 
     # Sections

@@ -344,9 +344,9 @@ class Orchestrator:
                     boost_keywords=boost_keywords,
                     filter_keywords=filter_keywords,
                 )
-                # Filter out low-relevance news items (score < 35)
+                # Filter out low-relevance news items (score < 45)
                 # This helps exclude generic stock news and off-topic articles
-                items = [item for item in items if item.score >= 35]
+                items = [item for item in items if item.score >= 45]
             elif collector_type == "financial":
                 items = score.score_financial_items(items)
             elif collector_type == "social":

@@ -119,7 +119,21 @@ keywords:
     - diversity
     - purpose
     - ESG
-  filter: []
+  filter:
+    - rugby
+    - RFU
+    - ATM
+    - banking
+    - cryptocurrency
+    - crypto
+    - bitcoin
+    - sports league
+    - NFL
+    - NBA
+    - NHL
+    - MLB
+    - soccer
+    - football scores
 
 # Collection depth preferences
 depth:
