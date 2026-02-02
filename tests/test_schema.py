@@ -1,17 +1,14 @@
 """Tests for schema module."""
 
-import pytest
 
 from moltpulse.core.lib.schema import (
-    Source,
     Engagement,
-    NewsItem,
     FinancialItem,
-    SocialItem,
-    AwardItem,
-    PEActivityItem,
-    ReportSection,
+    NewsItem,
     Report,
+    ReportSection,
+    SocialItem,
+    Source,
 )
 
 

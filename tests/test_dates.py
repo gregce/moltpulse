@@ -1,9 +1,6 @@
 """Tests for date utilities module."""
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch
-
-import pytest
 
 from moltpulse.core.lib.dates import (
     days_ago,

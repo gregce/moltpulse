@@ -3,9 +3,6 @@
 import json
 import threading
 import time
-from unittest.mock import patch
-
-import pytest
 
 from moltpulse.core.trace import (
     APICall,

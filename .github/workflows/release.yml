@@ -1,0 +1,149 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      release_required: ${{ steps.check.outputs.release_required }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if release required
+        id: check
+        run: |
+          # Skip automated commits
+          if [[ "${GITHUB_ACTOR}" == "github-actions[bot]" ]]; then
+            echo "Automated commit detected; skipping release."
+            echo "release_required=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Check for docs-only changes
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          if echo "$CHANGED_FILES" | grep -qvE '^(docs/|README\.md|\.md$)'; then
+            echo "release_required=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Docs-only changes; skipping release."
+            echo "release_required=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract version
+        id: version
+        if: steps.check.outputs.release_required == 'true'
+        run: |
+          VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/.*= *"\([^"]*\)".*/\1/')
+          BUILD_NUMBER="${{ github.run_number }}"
+          TAG="v${VERSION}+${BUILD_NUMBER}"
+
+          echo "Version: ${VERSION}"
+          echo "Build number: ${BUILD_NUMBER}"
+          echo "Tag: ${TAG}"
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: prepare
+    if: needs.prepare.outputs.release_required == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run linter
+        run: uv run ruff check .
+
+      - name: Run tests
+        run: uv run python -m pytest tests/ -v
+
+  release:
+    needs: [prepare, test]
+    if: needs.prepare.outputs.release_required == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Build package
+        run: uv build
+
+      - name: Create tag
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git rev-parse "${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} already exists, skipping."
+          else
+            git tag -a "${TAG}" -m "Release ${TAG}"
+            git push origin "${TAG}"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          # Check if release already exists
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "Release ${TAG} already exists, skipping."
+            exit 0
+          fi
+
+          gh release create "${TAG}" \
+            --title "MoltPulse ${TAG}" \
+            --generate-notes \
+            dist/*
+
+      - name: Publish workflow summary
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          {
+            echo "## Release ${TAG}"
+            echo ""
+            echo "- Version: ${VERSION}"
+            echo "- Commit: ${GITHUB_SHA}"
+            echo ""
+            echo "### Artifacts"
+            echo "- moltpulse-${VERSION}-py3-none-any.whl"
+            echo "- moltpulse-${VERSION}.tar.gz"
+          } >> "$GITHUB_STEP_SUMMARY"

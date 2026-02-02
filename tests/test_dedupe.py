@@ -1,6 +1,5 @@
 """Tests for deduplication module."""
 
-import pytest
 
 from moltpulse.core.lib import schema
 from moltpulse.core.lib.dedupe import (
@@ -194,7 +193,7 @@ class TestFindDuplicates:
         assert len(high_threshold) == 0
 
         # With low threshold, might be duplicates
-        low_threshold = find_duplicates(items, threshold=0.3)
+        _low_threshold = find_duplicates(items, threshold=0.3)  # noqa: F841
         # May or may not find duplicates depending on ngram overlap
 
 

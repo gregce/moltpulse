@@ -4,7 +4,6 @@ import pytest
 
 from moltpulse.core.domain_loader import load_domain
 from moltpulse.core.profile_loader import (
-    ProfileConfig,
     list_profiles,
     load_profile,
     validate_profile,

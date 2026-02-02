@@ -1,20 +1,17 @@
 """Tests for collector base classes."""
 
-import pytest
-from typing import Dict, Any, List
 
 from moltpulse.core.collector_base import (
+    AwardsCollector,
     Collector,
     CollectorResult,
     FinancialCollector,
     NewsCollector,
-    SocialCollector,
-    RSSCollector,
-    AwardsCollector,
     PEActivityCollector,
+    RSSCollector,
+    SocialCollector,
 )
 from moltpulse.core.lib import schema
-from moltpulse.core.profile_loader import ProfileConfig
 
 
 class TestCollectorResult:

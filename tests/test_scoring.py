@@ -1,12 +1,11 @@
 """Tests for scoring module."""
 
-import pytest
 from datetime import datetime, timedelta
 
-from moltpulse.core.lib.schema import NewsItem, FinancialItem, SocialItem, Engagement
+from moltpulse.core.lib.schema import Engagement, FinancialItem, NewsItem, SocialItem
 from moltpulse.core.lib.score import (
-    score_news_items,
     score_financial_items,
+    score_news_items,
     score_social_items,
     sort_items,
 )

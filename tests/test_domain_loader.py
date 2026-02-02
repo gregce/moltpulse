@@ -1,7 +1,8 @@
 """Tests for domain loader module."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from moltpulse.core.domain_loader import (
     DomainConfig,
