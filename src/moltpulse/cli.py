@@ -3,18 +3,18 @@
 
 Usage:
     # Generate reports
-    python moltpulse.py run --domain=advertising --profile=ricki daily
-    python moltpulse.py run --domain=advertising --profile=ricki weekly --deliver
+    moltpulse run --domain=advertising --profile=ricki daily
+    moltpulse run --domain=advertising --profile=ricki weekly --deliver
 
     # Manage domains
-    python moltpulse.py domain list
-    python moltpulse.py domain create healthcare --display-name "Healthcare Intelligence"
-    python moltpulse.py domain show advertising
+    moltpulse domain list
+    moltpulse domain create healthcare --display-name "Healthcare Intelligence"
+    moltpulse domain show advertising
 
     # Manage profiles
-    python moltpulse.py profile list advertising
-    python moltpulse.py profile create advertising sarah --thought-leader "Seth Godin:ThisIsSethsBlog:1"
-    python moltpulse.py profile show advertising ricki
+    moltpulse profile list advertising
+    moltpulse profile create advertising sarah --thought-leader "Seth Godin:ThisIsSethsBlog:1"
+    moltpulse profile show advertising ricki
 """
 
 import argparse
@@ -23,6 +23,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from moltpulse import __version__
 from moltpulse.core.cli.config_commands import add_config_parser, supports_color
 from moltpulse.core.cli.cron_commands import add_cron_parser
 from moltpulse.core.cli.domain_commands import add_domain_parser
@@ -59,6 +60,10 @@ def print_welcome() -> None:
 
     # Logo in green
     print(c(LOGO, GREEN))
+
+    # Version
+    print(f"  {c('v' + __version__, DIM)}")
+    print()
 
     # Description
     print("MoltPulse is a domain-agnostic industry intelligence framework that")
@@ -143,9 +148,9 @@ def add_run_parser(subparsers: argparse._SubParsersAction) -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  moltpulse.py run --domain=advertising --profile=ricki daily
-  moltpulse.py run --domain=advertising --profile=ricki weekly --deliver
-  moltpulse.py run --domain=advertising fundraising --deep --output=json
+  moltpulse run --domain=advertising --profile=ricki daily
+  moltpulse run --domain=advertising --profile=ricki weekly --deliver
+  moltpulse run --domain=advertising fundraising --deep --output=json
         """,
     )
 
@@ -304,6 +309,7 @@ Examples:
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
+        prog="moltpulse",
         description="MoltPulse - Industry Intelligence Framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
@@ -312,14 +318,22 @@ Commands:
   config    Manage API keys and settings
   domain    Manage domain instances
   profile   Manage interest profiles
+  cron      Install scheduled jobs to OpenClaw
 
 Examples:
-  moltpulse.py config                                  # Show configuration status
-  moltpulse.py config set                              # Configure API keys interactively
-  moltpulse.py run --domain=advertising --profile=ricki daily
-  moltpulse.py domain list
-  moltpulse.py profile show advertising ricki
+  moltpulse config                                    # Show configuration status
+  moltpulse config set                                # Configure API keys interactively
+  moltpulse run --domain=advertising --profile=ricki daily
+  moltpulse domain list
+  moltpulse profile show advertising ricki
         """,
+    )
+
+    # Add --version flag
+    parser.add_argument(
+        "-V", "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
