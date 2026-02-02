@@ -325,3 +325,73 @@ keywords:
     - trends
     - forecast
 ```
+
+## LLM Configuration
+
+Profiles can customize AI-generated report enhancements:
+
+```yaml
+profile_name: myprofile
+extends: default
+
+# LLM enhancement configuration
+llm:
+  enabled: true
+  mode: auto  # auto | openclaw | claude_cli | anthropic | disabled
+  thinking: medium  # low | medium | high
+
+  prompts:
+    # System context for all LLM calls
+    system_context: |
+      You are analyzing advertising industry intelligence for a nonprofit fundraiser.
+      Focus on actionable insights for donor cultivation timing and messaging.
+
+    # Executive summary prompt
+    executive_summary: |
+      Provide a 2-3 sentence executive summary highlighting the single most
+      important development and its implications for nonprofit fundraising.
+
+    # Strategic recommendations prompt
+    recommendations: |
+      Provide 3-5 specific, actionable recommendations for a nonprofit fundraiser
+      targeting advertising industry donors.
+
+    # Per-section insight prompts
+    section_insights:
+      financial: |
+        Analyze stock performance. Focus on industry health signals and
+        implications for corporate giving capacity.
+
+      news: |
+        Identify top 3 strategic themes and connect to partnership opportunities.
+
+      pe_activity: |
+        Summarize M&A implications for donor landscape and post-merger opportunities.
+```
+
+### LLM Mode Options
+
+| Mode | Description |
+|------|-------------|
+| `auto` | Auto-detect best available backend |
+| `openclaw` | Use OpenClaw gateway (must be running) |
+| `claude_cli` | Use Claude Code CLI (`claude --print`) |
+| `anthropic` | Use Anthropic SDK directly (requires `ANTHROPIC_API_KEY`) |
+| `disabled` | No LLM enhancement |
+
+### Thinking Level
+
+Controls depth of analysis:
+- `low` - Quick, surface-level insights
+- `medium` - Balanced analysis (default)
+- `high` - Deep, comprehensive analysis
+
+### CLI Overrides
+
+```bash
+# Disable LLM for this run
+moltpulse run --domain=advertising --profile=ricki --no-llm daily
+
+# Force specific mode
+moltpulse run --domain=advertising --profile=ricki --llm-mode=claude_cli daily
+```

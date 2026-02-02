@@ -1,9 +1,10 @@
 # Ricki's advertising industry profile
 # Focused on fundraising opportunities and industry health
+# See docs/profiles.md for configuration options
 
 profile_name: "ricki"
 description: "Advertising industry intelligence for nonprofit fundraising"
-extends: default
+extends: default  # Inherits from default.yaml, overrides specific settings
 
 # Entity focus - prioritized holding companies
 focus:

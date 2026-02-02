@@ -4,13 +4,13 @@ MoltPulse provides visibility into run execution through progress spinners and e
 
 ## Progress Display
 
-When running a report, MoltPulse shows real-time progress:
+When running a report, MoltPulse shows real-time progress with thread-safe output:
 
 ```bash
 $ moltpulse run --domain=advertising --profile=ricki daily
 
 ⠹ Alpha Vantage Financial...
-✓ Alpha Vantage Financial: 8 items (1.1s)
+✓ Alpha Vantage Financial: 5 items (6.2s)
 ⠸ RSS Feed...
 ✓ RSS Feed: 12 items (0.3s)
 ⠼ NewsData...
@@ -18,17 +18,21 @@ $ moltpulse run --domain=advertising --profile=ricki daily
 ⠴ X Social...
 ✓ X Social: 6 items (2.0s)
 
-✓ Run complete (4.2s) - 41 items collected
+✓ Run complete (6.5s) - 38 items collected
 ```
+
+Note: Financial collector takes longer due to Alpha Vantage rate limiting (1.2s between requests).
 
 In non-TTY environments (like OpenClaw or Claude Code), static progress is shown:
 
 ```
 ⏳ Alpha Vantage Financial...
-✓ Alpha Vantage Financial: 8 items (1.1s)
+✓ Alpha Vantage Financial: 5 items (6.2s)
 ⏳ RSS Feed...
 ✓ RSS Feed: 12 items (0.3s)
 ```
+
+Progress output is thread-safe - parallel collectors won't corrupt the display.
 
 ## Run Tracing
 
@@ -199,12 +203,56 @@ Collector errors are captured in the trace:
 
 The run continues with available collectors - one failure doesn't stop others.
 
+## Debug Mode
+
+Enable verbose output to troubleshoot issues:
+
+```bash
+MOLTPULSE_DEBUG=true moltpulse run --domain=advertising daily
+```
+
+Debug output includes:
+- API request/response details
+- Rate limiting events and delays
+- Collector selection decisions (priority, availability)
+- LLM backend detection
+- Entity matching details
+
+## Rate Limiting
+
+MoltPulse handles API rate limits automatically:
+
+| API | Limit | Handling |
+|-----|-------|----------|
+| Alpha Vantage (free) | 1 req/sec, 25/day | 1.2s delay between requests |
+| NewsData.io | 200 req/day | Batched queries |
+
+Rate-limited requests appear in traces:
+
+```json
+{
+  "name": "Alpha Vantage Financial",
+  "api_calls": [
+    {"endpoint": "...", "status": 200, "latency_ms": 234},
+    {"endpoint": "...", "status": 429, "error": "Rate limited"}
+  ]
+}
+```
+
+Use `--quick` to reduce API calls:
+
+```bash
+# Quick mode: 3 stock symbols max vs 5 in default
+moltpulse run --domain=advertising --quick daily
+```
+
 ## Performance Tips
 
-1. **Use `--quick` for testing**: Faster execution, fewer items
+1. **Use `--quick` for testing**: Faster execution, fewer API calls
 2. **Check preflight first**: `--dry-run` shows what will work
 3. **Monitor API calls**: `--trace` reveals bottlenecks
 4. **Configure fallbacks**: Email delivery can fall back to file
+5. **Watch rate limits**: Alpha Vantage free tier is very limited (25/day)
 
 ## Trace Schema Reference
 

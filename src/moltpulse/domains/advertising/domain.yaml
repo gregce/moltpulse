@@ -1,8 +1,14 @@
+# Advertising Industry Domain Configuration
+# See docs/domains.md for full documentation
+
 domain: advertising
 display_name: "Advertising Industry Intelligence"
 
 # Entity types available in this domain
+# Profiles can focus on subsets of these entities
 entity_types:
+  # Major advertising holding companies with stock symbols
+  # These are tracked for financial data via Alpha Vantage
   holding_companies:
     - {symbol: WPP, name: "WPP plc"}
     - {symbol: OMC, name: "Omnicom Group"}
@@ -12,9 +18,8 @@ entity_types:
     - {symbol: HAVAF, name: "Havas Group"}
     - {symbol: STAGW, name: "Stagwell Inc"}
     - {symbol: MDCA, name: "MDC Partners"}
-    - {symbol: RLGY, name: "Realogy Holdings"}
-    - {symbol: VOUS, name: "Vous Labs"}
 
+  # Agency categories (for filtering, not stock tracking)
   agency_categories:
     - creative
     - media
@@ -25,6 +30,7 @@ entity_types:
     - pr
     - production
 
+  # Notable independent agencies (for news matching)
   independent_agencies:
     - {name: "Wieden+Kennedy", type: creative}
     - {name: "R/GA", type: technology}
@@ -36,16 +42,37 @@ entity_types:
     - {name: "VMLY&R", type: creative}
 
 # Collectors available in this domain
+# Generic collectors (collectors.*) work across domains
+# Domain-specific collectors (domains.advertising.collectors.*) are specialized
 collectors:
+  # Financial: Alpha Vantage (primary), Yahoo Finance (fallback)
+  # API key: ALPHA_VANTAGE_API_KEY
+  # Rate limit: 1 req/sec (free tier), handled automatically
   - {type: financial, module: collectors.financial}
+
+  # News: NewsData.io (primary), NewsAPI.org (fallback)
+  # API key: NEWSDATA_API_KEY or NEWSAPI_API_KEY
   - {type: news, module: collectors.news}
+
+  # RSS: No API key required
   - {type: rss, module: collectors.rss}
+
+  # Social/X: xAI API
+  # API key: XAI_API_KEY
   - {type: social, module: collectors.social_x}
+
+  # Domain-specific: Advertising awards tracking
   - {type: awards, module: domains.advertising.collectors.awards}
+
+  # Domain-specific: PE & M&A activity
+  # API key: INTELLIZENCE_API_KEY or NEWSDATA_API_KEY (either works)
   - {type: pe_activity, module: domains.advertising.collectors.pe_activity}
 
 # Publications relevant to this domain
+# Priority: 1=primary trade pubs, 2=secondary sources, 3=general business
+# Profiles can select subsets of these publications
 publications:
+  # Primary trade publications
   - name: "Ad Age"
     rss: "https://adage.com/rss.xml"
     priority: 1
@@ -55,6 +82,8 @@ publications:
   - name: "Campaign"
     rss: "https://www.campaignlive.com/rss"
     priority: 1
+
+  # Secondary trade publications
   - name: "The Drum"
     rss: "https://www.thedrum.com/rss.xml"
     priority: 2
@@ -64,6 +93,8 @@ publications:
   - name: "Digiday"
     rss: "https://digiday.com/feed/"
     priority: 2
+
+  # General business with advertising coverage
   - name: "Forbes CMO"
     rss: "https://www.forbes.com/cmo-network/feed/"
     priority: 2
@@ -71,7 +102,7 @@ publications:
     rss: "https://hbr.org/topic/marketing/feed"
     priority: 3
 
-# Award shows tracked
+# Award shows tracked by the awards collector
 awards:
   - {name: "Cannes Lions", url: "https://www.canneslions.com", priority: 1}
   - {name: "Effie Awards", url: "https://www.effie.org", priority: 1}
@@ -80,13 +111,16 @@ awards:
   - {name: "D&AD", url: "https://www.dandad.org", priority: 2}
   - {name: "Webby Awards", url: "https://www.webbyawards.com", priority: 3}
 
-# Report types available
+# Report types available in this domain
+# Profiles can enable/disable specific reports
 reports:
   - {type: daily_brief, module: domains.advertising.reports.daily_brief}
   - {type: weekly_digest, module: domains.advertising.reports.weekly_digest}
   - {type: fundraising, module: domains.advertising.reports.fundraising}
 
-# Default thought leaders (can be overridden in profiles)
+# Default thought leaders for X/Twitter tracking
+# Profiles can override or extend this list
+# Requires XAI_API_KEY for social collector
 thought_leaders:
   - {name: "Scott Galloway", x_handle: "profgalloway", newsletter: "No Mercy / No Malice"}
   - {name: "Seth Godin", x_handle: "ThisIsSethsBlog", newsletter: "Seth's Blog"}
@@ -95,3 +129,11 @@ thought_leaders:
   - {name: "Mark Pritchard", x_handle: "PGMarcPritchard", title: "P&G Chief Brand Officer"}
   - {name: "Shelley Palmer", x_handle: "shelleypalmer"}
   - {name: "Bob Hoffman", x_handle: "adcontrarian", newsletter: "The Ad Contrarian"}
+
+# LLM enhancement defaults for this domain
+# Can be overridden in profiles
+llm_defaults:
+  system_context: |
+    You are analyzing advertising industry intelligence.
+    Focus on strategic trends, market dynamics, and actionable insights.
+  thinking: medium

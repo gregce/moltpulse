@@ -247,8 +247,8 @@ moltpulse domain update healthcare \
 ## Generic vs Domain-Specific Collectors
 
 **Generic collectors** work across domains:
-- `collectors.financial` - Stock/financial data via Alpha Vantage
-- `collectors.news` - News via NewsData.io or NewsAPI
+- `collectors.financial` - Stock/financial data via Alpha Vantage (with Yahoo Finance fallback)
+- `collectors.news` - News via NewsData.io (primary) or NewsAPI.org (fallback)
 - `collectors.rss` - RSS feed parsing
 - `collectors.social_x` - X/Twitter via xAI
 
@@ -258,3 +258,34 @@ moltpulse domain update healthcare \
 - `domains.healthcare.collectors.regulatory` - FDA updates
 
 Use generic collectors when possible; create domain-specific ones for specialized data sources.
+
+### Collector Priority
+
+When multiple collectors exist for the same type (e.g., NewsData and NewsAPI for news), selection uses priority:
+
+```python
+class NewsDataCollector(NewsCollector):
+    REQUIRED_API_KEYS = ["NEWSDATA_API_KEY"]
+    COLLECTOR_PRIORITY = 10  # Higher = preferred
+
+class NewsAPICollector(NewsCollector):
+    REQUIRED_API_KEYS = ["NEWSAPI_API_KEY"]
+    COLLECTOR_PRIORITY = 0  # Lower = fallback
+```
+
+The orchestrator:
+1. Sorts collectors by `COLLECTOR_PRIORITY` (higher first)
+2. Prefers collectors with configured API keys
+3. Falls back to first available if none have keys
+
+### API Rate Limits
+
+Some APIs have strict rate limits:
+
+| API | Limit | Collector Handling |
+|-----|-------|-------------------|
+| Alpha Vantage (free) | 1/sec, 25/day | 1.2s delay, reduced depth limits |
+| NewsData.io | 200/day | Batched queries |
+| Yahoo Finance | Lenient | No special handling |
+
+Use `--quick` flag to reduce API calls when testing.

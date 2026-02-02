@@ -1,15 +1,18 @@
 # Default profile for advertising domain
 # This is a baseline configuration that other profiles can extend
+# See docs/profiles.md for full configuration options
 
 profile_name: "default"
 description: "Default advertising industry monitoring profile"
 
 # Entity focus - all entities at equal priority
+# Override in specific profiles to prioritize certain companies
 focus:
   holding_companies:
-    priority_1: []  # Override in specific profiles
-    priority_2: []
-    exclude: []
+    priority_1: []  # Most important (e.g., WPP, OMC)
+    priority_2: []  # Secondary importance
+    priority_3: []  # Tertiary
+    exclude: []     # Companies to ignore
 
   agency_types:
     primary: [creative, media]
@@ -30,7 +33,7 @@ thought_leaders:
     x_handle: "ThisIsSethsBlog"
     priority: 2
 
-# Publications to monitor (from domain.yaml)
+# Publications to monitor (subset of domain.yaml publications)
 publications:
   - Ad Age
   - AdWeek
@@ -45,12 +48,23 @@ reports:
   weekly_digest: true
   fundraising: false
 
-# Scoring adjustments
+# Keywords for relevance scoring
 keywords:
-  boost: []
-  filter: []
+  boost: []   # Terms that increase item relevance
+  filter: []  # Terms that decrease item relevance
+
+# Collection depth per report type
+# Options: quick (fewer items, faster), default, deep (more items, slower)
+depth:
+  daily: default
+  weekly: default
 
 # Delivery settings (override per profile)
 delivery:
-  channel: console  # Default to console output
+  channel: console  # console | file | email
   fallback: null
+
+# LLM enhancement (disabled by default, enable in specific profiles)
+llm:
+  enabled: false
+  mode: auto  # auto | openclaw | claude_cli | anthropic | disabled
