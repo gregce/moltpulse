@@ -378,10 +378,26 @@ uv sync --all-extras
 uv run moltpulse --version
 ```
 
+### Running from Source
+
+```bash
+# Option 1: Use uv run (always uses latest code, no reinstall needed)
+uv run moltpulse run --domain=advertising --profile=ricki daily
+
+# Option 2: Install globally for direct command access
+uv tool install /path/to/moltpulse
+
+# After global install, run directly:
+moltpulse run --domain=advertising --profile=ricki daily
+
+# Reinstall after making changes (only needed for Option 2)
+uv tool install --reinstall /path/to/moltpulse
+```
+
 ### Common Commands
 
 ```bash
-# Run from source (always uses latest code)
+# Run from source
 uv run moltpulse run --domain=advertising --profile=ricki daily
 
 # Run tests
