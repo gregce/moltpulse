@@ -220,6 +220,12 @@ Examples:
     )
 
     run_parser.add_argument(
+        "--trace",
+        action="store_true",
+        help="Show detailed execution trace with API calls",
+    )
+
+    run_parser.add_argument(
         "--verbose", "-v",
         action="store_true",
         help="Verbose output",
@@ -488,9 +494,6 @@ def cmd_run(args: argparse.Namespace) -> int:
         print("Error: Please specify a report type (daily, weekly, fundraising)")
         return 1
 
-    # Load API keys
-    config = env.get_config()
-
     if args.verbose:
         print(f"Domain: {args.domain}")
         print(f"Profile: {args.profile}")
@@ -512,47 +515,75 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"Available profiles: {', '.join(list_profiles(args.domain))}")
         return 1
 
-    # Get date range
-    from_date, to_date = get_date_range(args)
+    # Get depth
     depth = get_depth(args)
 
     if args.verbose:
-        print(f"Date range: {from_date} to {to_date}")
         print(f"Depth: {depth}")
 
-    # Dry run - just show configuration
+    # Calculate days from date range if specified
+    days = 30
+    if args.from_date:
+        try:
+            from datetime import datetime as dt
+            from_dt = dt.strptime(args.from_date, "%Y-%m-%d")
+            to_dt = dt.strptime(args.to_date, "%Y-%m-%d") if args.to_date else dt.now()
+            days = (to_dt - from_dt).days
+        except ValueError:
+            print(f"Error: Invalid date format. Use YYYY-MM-DD.")
+            return 1
+
+    # Initialize orchestrator
+    orchestrator = Orchestrator(
+        domain_name=args.domain,
+        profile_name=args.profile,
+        depth=depth,
+        days=days,
+    )
+
+    # Dry run - just show configuration and preflight
     if args.dry_run:
         print("\n=== DRY RUN ===")
         print(f"Domain: {args.domain}")
         print(f"Profile: {args.profile}")
         print(f"Report type: {args.report_type}")
-        print(f"Date range: {from_date} to {to_date}")
+        print(f"Date range: {orchestrator.from_date} to {orchestrator.to_date}")
         print(f"Depth: {depth}")
-        print(f"\nCollectors to run:")
-        for collector in domain.collectors:
-            print(f"  - {collector.get('type')}: {collector.get('module')}")
-        print(f"\nThought leaders to track:")
+
+        # Show preflight status
+        orchestrator.print_preflight_report()
+
+        print("Thought leaders to track:")
         for leader in profile.thought_leaders[:5]:
             print(f"  - {leader.get('name')} (@{leader.get('x_handle')})")
+        if len(profile.thought_leaders) > 5:
+            print(f"  ... and {len(profile.thought_leaders) - 5} more")
         return 0
 
-    # Initialize orchestrator
-    orchestrator = Orchestrator(domain, profile, config)
+    # Determine if we should show progress (not for JSON output or no-deliver mode)
+    show_progress = not (args.output == "json" and args.no_deliver)
 
     # Run collection and report generation
     try:
-        if args.verbose:
-            print("\nCollecting data...")
-
-        report = orchestrator.run(
+        result = orchestrator.run(
             report_type=args.report_type,
-            from_date=from_date,
-            to_date=to_date,
-            depth=depth,
+            show_progress=show_progress,
         )
 
+        if not result.success:
+            for error in result.errors:
+                print(f"Warning: {error}", file=sys.stderr)
+
+        if result.report is None:
+            print("Error: No report generated")
+            return 1
+
         # Convert report to dict for output
-        report_dict = report.to_dict()
+        report_dict = result.report.to_dict()
+
+        # If trace requested and output is JSON, include trace in output
+        if args.trace and args.output == "json":
+            report_dict["_trace"] = result.trace.to_dict() if result.trace else None
 
     except Exception as e:
         print(f"Error generating report: {e}")
@@ -561,18 +592,23 @@ def cmd_run(args: argparse.Namespace) -> int:
             traceback.print_exc()
         return 1
 
+    # Show trace summary if requested (and not JSON mode)
+    if args.trace and args.output != "json" and result.trace:
+        print("\n" + result.trace.summary())
+        print()
+
     # Format output
     output = format_output(report_dict, args.output)
 
     # Delivery (--no-deliver overrides --deliver for OpenClaw orchestration)
     if args.deliver and not args.no_deliver:
-        result = deliver_report(report, profile, format=args.output)
-        if not result.success:
-            print(f"Warning: Delivery failed ({result.error}), outputting to console")
+        delivery_result = deliver_report(result.report, profile, format=args.output)
+        if not delivery_result.success:
+            print(f"Warning: Delivery failed ({delivery_result.error}), outputting to console")
             print(output)
         else:
             if args.verbose:
-                print(f"Delivered via {result.channel}: {result.message}")
+                print(f"Delivered via {delivery_result.channel}: {delivery_result.message}")
     elif args.output_path:
         args.output_path.parent.mkdir(parents=True, exist_ok=True)
         args.output_path.write_text(output)

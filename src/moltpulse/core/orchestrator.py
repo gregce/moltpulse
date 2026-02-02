@@ -2,6 +2,7 @@
 
 import importlib
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +13,8 @@ from .domain_loader import DomainConfig, load_domain
 from .lib import cache, dates, dedupe, env, normalize, schema, score
 from .profile_loader import ProfileConfig, load_profile
 from .report_base import ReportGenerator
+from .trace import CollectorTrace, RunTrace, TracingContext
+from .ui import RunProgress
 
 
 class OrchestratorResult:
@@ -22,10 +25,12 @@ class OrchestratorResult:
         report: Optional[schema.Report] = None,
         collector_results: Optional[Dict[str, CollectorResult]] = None,
         errors: Optional[List[str]] = None,
+        trace: Optional[RunTrace] = None,
     ):
         self.report = report
         self.collector_results = collector_results or {}
         self.errors = errors or []
+        self.trace = trace
 
     @property
     def success(self) -> bool:
@@ -403,24 +408,46 @@ class Orchestrator:
 
         return report
 
-    def run(self, report_type: str = "daily_brief") -> OrchestratorResult:
+    def run(
+        self,
+        report_type: str = "daily_brief",
+        show_progress: bool = True,
+    ) -> OrchestratorResult:
         """Run full orchestration pipeline.
 
         Args:
             report_type: Type of report to generate
+            show_progress: Whether to show progress spinners
 
         Returns:
             OrchestratorResult with report and metadata
         """
         errors = []
 
+        # Initialize trace
+        trace = RunTrace(
+            domain=self.domain_name,
+            profile=self.profile_name,
+            report_type=report_type,
+            depth=self.depth,
+        )
+        trace.start()
+
+        # Initialize progress display
+        progress = None
+        if show_progress:
+            progress = RunProgress(self.domain_name, self.profile_name, report_type)
+            progress.show_header()
+
         # Discover collectors
         collectors = self.discover_collectors()
         if not collectors:
             errors.append("No collectors available")
 
-        # Run collectors
-        collector_results = self.run_collectors()
+        # Run collectors with tracing
+        collector_results = self._run_collectors_with_trace(
+            trace, progress, max_workers=5
+        )
 
         # Check for collector errors
         for ctype, result in collector_results.items():
@@ -428,7 +455,13 @@ class Orchestrator:
                 errors.append(f"{ctype}: {result.error}")
 
         # Process items
+        if progress:
+            progress.show_processing()
+
         processed_items = self.process_items(collector_results)
+
+        if progress:
+            progress.end_processing()
 
         # Generate report
         try:
@@ -438,11 +471,103 @@ class Orchestrator:
             errors.append(f"Report generation failed: {e}")
             report = None
 
+        # Complete trace
+        trace.complete()
+
+        # Show completion
+        if progress:
+            total_items = sum(len(items) for items in processed_items.values())
+            progress.show_complete(total_items)
+
         return OrchestratorResult(
             report=report,
             collector_results=collector_results,
             errors=errors,
+            trace=trace,
         )
+
+    def _run_collectors_with_trace(
+        self,
+        trace: RunTrace,
+        progress: Optional[RunProgress],
+        max_workers: int = 5,
+    ) -> Dict[str, CollectorResult]:
+        """Run collectors with tracing and progress display.
+
+        Args:
+            trace: RunTrace to populate
+            progress: Optional progress display
+            max_workers: Maximum parallel workers
+
+        Returns:
+            Dict mapping collector type to result
+        """
+        if not self._collectors:
+            self.discover_collectors()
+
+        results: Dict[str, CollectorResult] = {}
+
+        def run_collector(collector: Collector) -> Tuple[str, CollectorResult, CollectorTrace]:
+            # Create collector trace
+            collector_trace = CollectorTrace(
+                name=collector.name,
+                collector_type=collector.collector_type,
+            )
+
+            try:
+                # Run collection within tracing context
+                with TracingContext(collector_trace):
+                    result = collector.collect(
+                        self.profile,
+                        self.from_date,
+                        self.to_date,
+                        self.depth,
+                    )
+                    collector_trace.complete(
+                        items_collected=len(result.items),
+                        success=result.success,
+                        error=result.error,
+                    )
+            except Exception as e:
+                collector_trace.complete(success=False, error=str(e))
+                result = CollectorResult(
+                    items=[],
+                    sources=[],
+                    error=f"Collector error: {e}",
+                )
+
+            return collector.collector_type, result, collector_trace
+
+        # Run collectors in parallel
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all collectors
+            future_to_collector = {}
+            for collector in self._collectors:
+                if progress:
+                    progress.start_collector(collector.name, collector.collector_type)
+                future = executor.submit(run_collector, collector)
+                future_to_collector[future] = collector
+
+            # Process results as they complete
+            for future in as_completed(future_to_collector):
+                collector = future_to_collector[future]
+                collector_type, result, collector_trace = future.result()
+
+                # Add to results
+                results[collector_type] = result
+                trace.add_collector_trace(collector_trace)
+
+                # Update progress
+                if progress:
+                    progress.end_collector(
+                        collector.name,
+                        len(result.items),
+                        collector_trace.duration_ms,
+                        success=result.success,
+                        error=result.error,
+                    )
+
+        return results
 
 
 def run_moltpulse(
@@ -451,6 +576,7 @@ def run_moltpulse(
     report_type: str = "daily_brief",
     depth: str = "default",
     days: int = 30,
+    show_progress: bool = True,
 ) -> OrchestratorResult:
     """Convenience function to run MoltPulse.
 
@@ -460,6 +586,7 @@ def run_moltpulse(
         report_type: Type of report
         depth: Collection depth
         days: Days to look back
+        show_progress: Whether to show progress spinners
 
     Returns:
         OrchestratorResult
@@ -470,4 +597,4 @@ def run_moltpulse(
         depth=depth,
         days=days,
     )
-    return orchestrator.run(report_type)
+    return orchestrator.run(report_type, show_progress=show_progress)

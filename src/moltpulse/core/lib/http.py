@@ -1,4 +1,4 @@
-"""HTTP utilities for Moltos (stdlib only)."""
+"""HTTP utilities for MoltPulse (stdlib only)."""
 
 import json
 import os
@@ -11,9 +11,35 @@ from typing import Any, Dict, Optional
 DEFAULT_TIMEOUT = 30
 MAX_RETRIES = 3
 RETRY_DELAY = 1.0
-USER_AGENT = "moltos/0.1 (Industry Intelligence Framework)"
+USER_AGENT = "moltpulse/0.1 (Industry Intelligence Framework)"
 
-DEBUG = os.environ.get("MOLTOS_DEBUG", "").lower() in ("1", "true", "yes")
+DEBUG = os.environ.get("MOLTPULSE_DEBUG", "").lower() in ("1", "true", "yes")
+
+
+def _record_trace(
+    method: str,
+    url: str,
+    status: int,
+    start_time: float,
+    cached: bool = False,
+    error: Optional[str] = None,
+) -> None:
+    """Record API call in active trace context if available."""
+    try:
+        from moltpulse.core.trace import record_api_call
+
+        latency_ms = int((time.monotonic() - start_time) * 1000)
+        record_api_call(
+            endpoint=url,
+            method=method,
+            status=status,
+            latency_ms=latency_ms,
+            cached=cached,
+            error=error,
+        )
+    except ImportError:
+        # Trace module not available, skip
+        pass
 
 
 def log(msg: str):
@@ -72,12 +98,22 @@ def request(
     if json_data:
         log(f"Payload keys: {list(json_data.keys())}")
 
+    # Track timing for tracing
+    start_time = time.monotonic()
+    status_code = 0
+    error_msg = None
+
     last_error = None
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as response:
                 body = response.read().decode("utf-8")
+                status_code = response.status
                 log(f"Response: {response.status} ({len(body)} bytes)")
+
+                # Record API call in trace context if active
+                _record_trace(method, url, status_code, start_time, cached=False, error=None)
+
                 return json.loads(body) if body else {}
         except urllib.error.HTTPError as e:
             body = None
@@ -89,6 +125,9 @@ def request(
             if body:
                 log(f"Error body: {body[:500]}")
             last_error = HTTPError(f"HTTP {e.code}: {e.reason}", e.code, body)
+
+            # Record trace for HTTP errors
+            _record_trace(method, url, e.code, start_time, cached=False, error=str(e.reason))
 
             # Don't retry client errors (4xx) except rate limits
             if 400 <= e.code < 500 and e.code != 429:

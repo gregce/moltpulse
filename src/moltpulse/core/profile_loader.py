@@ -222,10 +222,6 @@ def validate_profile(config: ProfileConfig) -> List[str]:
         email_config = config.delivery.get("email", {})
         if not email_config.get("to"):
             errors.append("Email delivery requires 'to' address")
-    elif channel == "whatsapp":
-        whatsapp_config = config.delivery.get("whatsapp", {})
-        if not whatsapp_config.get("to"):
-            errors.append("WhatsApp delivery requires 'to' phone number")
 
     return errors
 

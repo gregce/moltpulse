@@ -72,7 +72,7 @@ def add_profile_parser(subparsers: argparse._SubParsersAction) -> None:
     )
     create_parser.add_argument(
         "--delivery-channel",
-        choices=["email", "file", "console", "whatsapp", "slack"],
+        choices=["email", "file", "console"],
         help="Primary delivery channel",
     )
     create_parser.add_argument(
@@ -116,7 +116,7 @@ def add_profile_parser(subparsers: argparse._SubParsersAction) -> None:
     update_parser.add_argument(
         "--set-delivery-channel",
         dest="delivery_channel",
-        choices=["email", "file", "console", "whatsapp", "slack"],
+        choices=["email", "file", "console"],
         help="Set delivery channel",
     )
     update_parser.add_argument(
