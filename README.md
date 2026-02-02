@@ -1,6 +1,8 @@
 # MoltPulse
 
-![MoltPulse](header.jpeg)
+<p align="center">
+  <img src="header.jpeg" alt="MoltPulse" width="600">
+</p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -87,31 +89,237 @@ moltpulse run --domain=advertising --profile=ricki --deep weekly
 | Weekly Digest | `moltpulse run ... weekly` | Comprehensive weekly analysis with trends and M&A activity |
 | Fundraising | `moltpulse run ... fundraising` | Nonprofit-focused outlook with timing recommendations |
 
-## API Keys
+## Collectors & Data Sources
 
-| Key | Provider | Enables |
-|-----|----------|---------|
-| `ALPHA_VANTAGE_API_KEY` | [Alpha Vantage](https://www.alphavantage.co/) | Financial data |
-| `NEWSDATA_API_KEY` | [NewsData.io](https://newsdata.io/) | News aggregation |
-| `XAI_API_KEY` | [xAI](https://x.ai/) | X/Twitter search |
-| `NEWSAPI_API_KEY` | [NewsAPI](https://newsapi.org/) | Fallback news |
-| `INTELLIZENCE_API_KEY` | Intellizence | M&A data |
+MoltPulse uses a collector architecture where each data source is encapsulated in a collector class. The advertising domain ships with these collectors:
 
-Keys are stored in `~/.config/moltpulse/.env` or can be set via environment variables.
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                 ADVERTISING DOMAIN COLLECTORS                       │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
+│  │ Financial        │────▶│ Alpha Vantage API                    │  │
+│  │ (stock prices)   │     │ Holding company stock performance    │  │
+│  └──────────────────┘     └──────────────────────────────────────┘  │
+│                                                                      │
+│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
+│  │ News             │────▶│ NewsData.io API (primary)            │  │
+│  │ (industry news)  │     │ NewsAPI (fallback)                   │  │
+│  └──────────────────┘     └──────────────────────────────────────┘  │
+│                                                                      │
+│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
+│  │ RSS              │────▶│ Ad Age, AdWeek, Campaign, The Drum   │  │
+│  │ (publications)   │     │ Marketing Week, Digiday, Forbes CMO  │  │
+│  └──────────────────┘     └──────────────────────────────────────┘  │
+│                                                                      │
+│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
+│  │ Social           │────▶│ xAI API with x_search tool           │  │
+│  │ (thought leaders)│     │ Tracks handles defined in profiles   │  │
+│  └──────────────────┘     └──────────────────────────────────────┘  │
+│                                                                      │
+│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
+│  │ Awards           │────▶│ Web scraping (no API key)            │  │
+│  │ (industry awards)│     │ Cannes Lions, Effies, Clios, etc.    │  │
+│  └──────────────────┘     └──────────────────────────────────────┘  │
+│                                                                      │
+│  ┌──────────────────┐     ┌──────────────────────────────────────┐  │
+│  │ PE Activity      │────▶│ Intellizence API (primary)           │  │
+│  │ (M&A tracking)   │     │ News APIs (fallback for M&A news)    │  │
+│  └──────────────────┘     └──────────────────────────────────────┘  │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### API Keys
+
+| Key | Provider | Collector | Required? |
+|-----|----------|-----------|-----------|
+| `ALPHA_VANTAGE_API_KEY` | [Alpha Vantage](https://www.alphavantage.co/) | Financial | Yes for stock data |
+| `NEWSDATA_API_KEY` | [NewsData.io](https://newsdata.io/) | News, PE Activity | Either this or NewsAPI |
+| `NEWSAPI_API_KEY` | [NewsAPI](https://newsapi.org/) | News, PE Activity | Either this or NewsData |
+| `XAI_API_KEY` | [xAI](https://x.ai/) | Social | Yes for X/Twitter |
+| `INTELLIZENCE_API_KEY` | Intellizence | PE Activity | Optional (uses news fallback) |
+
+**Note:** RSS and Awards collectors require no API keys - they use direct HTTP requests and web scraping.
+
+### Key Configuration
+
+```bash
+# Store in ~/.config/moltpulse/.env (secure, permissions 0600)
+moltpulse config set ALPHA_VANTAGE_API_KEY your_key
+moltpulse config set NEWSDATA_API_KEY your_key
+
+# Or set via environment variables
+export ALPHA_VANTAGE_API_KEY=your_key
+export NEWSDATA_API_KEY=your_key
+
+# Check which collectors are available
+moltpulse config
+```
+
+### Collector Availability
+
+Run `moltpulse config` to see which collectors are enabled based on your configured API keys:
+
+```
+API Keys:
+  ✓ ALPHA_VANTAGE_API_KEY  sk-...abc  (Financial data)
+  ✓ NEWSDATA_API_KEY       nd-...xyz  (News aggregation)
+  ✗ XAI_API_KEY            not set    (X/Twitter search)
+
+Collectors:
+  ✓ Financial    Alpha Vantage stock data
+  ✓ News         News aggregation
+  ✓ RSS          RSS feeds (no key required)
+  ✗ Social/X     Needs XAI_API_KEY
+  ✓ Awards       Industry awards (no key required)
+  ✓ PE/M&A       M&A tracking via news fallback
+```
+
+## CLI Flags
+
+### Run Command
+
+| Flag | Description |
+|------|-------------|
+| `--domain` | **Required.** Domain instance (e.g., `advertising`, `healthcare`) |
+| `--profile` | Interest profile to load (default: `default`) |
+| `--quick` | Shallow data collection - fewer items, faster execution |
+| `--deep` | Thorough data collection - more items, longer timeouts |
+| `--dry-run` | Preview what would be collected without running |
+| `--deliver` | Send report via profile's delivery channel (email, file) |
+| `--no-deliver` | Output to stdout only, skip delivery (for OpenClaw) |
+| `--output` | Format: `compact` (default), `markdown`, `json`, `full` |
+| `--output-path` | Write output to file instead of stdout |
+| `--from-date` | Start date (YYYY-MM-DD), defaults based on report type |
+| `--to-date` | End date (YYYY-MM-DD), defaults to today |
+| `--trace` | Show detailed execution trace with API calls and timing |
+| `--verbose`, `-v` | Verbose output with debug information |
+
+### Report-Specific Flags
+
+| Report | Flag | Description |
+|--------|------|-------------|
+| `daily` | `--sections` | Specific sections to include |
+| `weekly` | `--sections` | Specific sections to include |
+| `fundraising` | `--horizon` | Forecast horizon: `6m`, `1y`, `3y`, `all` |
 
 ## OpenClaw Integration
 
-MoltPulse integrates with [OpenClaw](https://github.com/anthropics/openclaw) for scheduled execution:
+MoltPulse integrates with [OpenClaw](https://github.com/anthropics/openclaw) for scheduled, automated report generation. OpenClaw is Anthropic's cron-like scheduler that can run commands on a schedule and handle delivery.
 
-```bash
-# Install cron jobs
-moltpulse cron install --all
+### How It Works
 
-# For orchestrated delivery, use --no-deliver
-moltpulse run --domain=advertising --profile=ricki --no-deliver daily
+When integrated with OpenClaw, the execution flow is:
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    OPENCLAW ORCHESTRATION                         │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  ┌──────────┐    ┌───────────┐    ┌──────────┐    ┌──────────┐   │
+│  │ SCHEDULE │───▶│ OPENCLAW  │───▶│ MOLTPULSE│───▶│ OPENCLAW │   │
+│  │ (cron)   │    │ (trigger) │    │ (collect)│    │ (deliver)│   │
+│  └──────────┘    └───────────┘    └──────────┘    └──────────┘   │
+│       │                                                │          │
+│       ▼                                                ▼          │
+│  "0 7 * * 1-5"                                   Email/Slack/     │
+│  (7am weekdays)                                   Custom hook     │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-See [cron templates](src/moltpulse/cron/) for available schedules.
+1. **OpenClaw triggers** MoltPulse at scheduled times (e.g., 7am weekdays)
+2. **MoltPulse collects** data from APIs, RSS feeds, and scrapers
+3. **MoltPulse generates** the report in markdown format
+4. **OpenClaw delivers** via its configured channels (email, Slack, webhooks)
+
+The key insight: MoltPulse handles data collection and report generation, while OpenClaw handles scheduling and delivery orchestration.
+
+### Cron Templates
+
+MoltPulse ships with pre-configured cron templates:
+
+| Template | Schedule | Description |
+|----------|----------|-------------|
+| `daily-brief` | `0 7 * * 1-5` (7am weekdays) | Morning intelligence brief |
+| `weekly-digest` | `0 8 * * 1` (8am Monday) | Weekly analysis digest |
+| `fundraising-outlook` | `0 9 1 * *` (9am 1st of month) | Monthly fundraising outlook |
+
+### Installing Cron Jobs
+
+```bash
+# List available templates
+moltpulse cron list
+
+# Show template details
+moltpulse cron show daily-brief
+
+# Preview install commands (dry run)
+moltpulse cron install --all --dry-run
+
+# Install all templates to OpenClaw
+moltpulse cron install --all
+
+# Install a specific template
+moltpulse cron install daily-brief
+```
+
+### Template Format
+
+Cron templates are JSON files in `src/moltpulse/cron/`:
+
+```json
+{
+  "name": "MoltPulse Daily Brief",
+  "description": "Generate and deliver morning industry intelligence brief",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 7 * * 1-5",
+    "tz": "America/Los_Angeles"
+  },
+  "sessionTarget": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "moltpulse run --domain=advertising --profile=ricki --output=markdown --no-deliver daily",
+    "deliver": true
+  }
+}
+```
+
+Key fields:
+- **`schedule.expr`**: Standard cron expression
+- **`schedule.tz`**: Timezone for schedule
+- **`sessionTarget`**: `isolated` (clean session) or `resume` (continue existing)
+- **`payload.message`**: The moltpulse command to run
+- **`payload.deliver`**: Whether OpenClaw should deliver the output
+
+### The `--no-deliver` Flag
+
+When running under OpenClaw, use `--no-deliver` to let OpenClaw handle delivery:
+
+```bash
+# MoltPulse outputs to stdout, OpenClaw delivers
+moltpulse run --domain=advertising --profile=ricki --output=markdown --no-deliver daily
+```
+
+Without this flag, MoltPulse would attempt its own delivery (email/file), potentially duplicating OpenClaw's delivery.
+
+### Running Without OpenClaw
+
+MoltPulse works standalone - OpenClaw is optional:
+
+```bash
+# Manual run with console output
+moltpulse run --domain=advertising --profile=ricki daily
+
+# Manual run with file output
+moltpulse run --domain=advertising --profile=ricki --output=markdown --output-path=report.md daily
+
+# Manual run with email delivery (uses profile's delivery config)
+moltpulse run --domain=advertising --profile=ricki --deliver daily
+```
 
 ## Development
 
@@ -123,7 +331,13 @@ uv run python -m pytest tests/
 moltpulse config
 ```
 
-See [Architecture](docs/architecture.md) for adding domains and collectors.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines, including:
+- Adding new collectors
+- Creating new domains
+- Implementing report types
+- Code style and testing
+
+See [Architecture](docs/architecture.md) for system design overview.
 
 ## License
 
