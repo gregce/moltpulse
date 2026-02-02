@@ -307,11 +307,6 @@ scraping = [
     { name = "playwright" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "anthropic", marker = "extra == 'llm'", specifier = ">=0.25.0" },
@@ -324,9 +319,6 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
 ]
 provides-extras = ["scraping", "llm", "dev"]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=9.0.2" }]
 
 [[package]]
 name = "packaging"
